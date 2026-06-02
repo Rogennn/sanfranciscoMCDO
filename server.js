@@ -129,20 +129,6 @@ async function getAsync(sql, params = []) {
     return result.rows[0];
 }
 
-// Middleware to verify JWT Token
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) return res.status(401).json({ message: 'Access denied. Please login.' });
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ message: 'Session expired. Please login again.' });
-        req.user = user;
-        next();
-    });
-};
-
 // GET all notes
 app.get('/api/notes', async (req, res) => {
     try {
@@ -159,7 +145,7 @@ app.get('/api/notes', async (req, res) => {
 });
 
 // SAVE or UPDATE a note
-app.post('/api/notes', authenticateToken, async (req, res) => {
+app.post('/api/notes', async (req, res) => {
     const { date, text, type } = req.body;
     
     try {
@@ -177,7 +163,7 @@ app.post('/api/notes', authenticateToken, async (req, res) => {
 });
 
 // DELETE a note
-app.delete('/api/notes/:date', authenticateToken, async (req, res) => {
+app.delete('/api/notes/:date', async (req, res) => {
     try {
         await runAsync("DELETE FROM calendar_notes WHERE note_date = $1", [req.params.date]);
         res.json({ message: 'Note deleted' });
@@ -198,7 +184,7 @@ app.get('/api/about', async (req, res) => {
     }
 });
 
-app.post('/api/about', authenticateToken, async (req, res) => {
+app.post('/api/about', async (req, res) => {
     const { description, vision, mission } = req.body;
     
     try {
@@ -232,7 +218,7 @@ app.get('/api/cooperatives', async (req, res) => {
     }
 });
 
-app.post('/api/cooperatives', authenticateToken, async (req, res) => {
+app.post('/api/cooperatives', async (req, res) => {
     const c = req.body;
     const data = [
         c.name, c.type, c.status, c.members, c.businessActivity, c.products,
@@ -257,7 +243,7 @@ app.post('/api/cooperatives', authenticateToken, async (req, res) => {
     }
 });
 
-app.delete('/api/cooperatives/:id', authenticateToken, async (req, res) => {
+app.delete('/api/cooperatives/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     
     try {
@@ -280,7 +266,7 @@ app.get('/api/announcements', async (req, res) => {
     }
 });
 
-app.post('/api/announcements', authenticateToken, async (req, res) => {
+app.post('/api/announcements', async (req, res) => {
     const a = req.body;
     const data = [a.title, a.date || null, a.content, a.image, a.status, a.createdBy];
     
@@ -300,7 +286,7 @@ app.post('/api/announcements', authenticateToken, async (req, res) => {
     }
 });
 
-app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
+app.delete('/api/announcements/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     
     try {
@@ -313,7 +299,7 @@ app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
 });
 
 // DELETE all announcements
-app.delete('/api/announcements', authenticateToken, async (req, res) => {
+app.delete('/api/announcements', async (req, res) => {
     try {
         await runAsync("DELETE FROM announcements");
         res.json({ message: 'All announcements deleted' });
@@ -323,19 +309,10 @@ app.delete('/api/announcements', authenticateToken, async (req, res) => {
     }
 });
 
-// Simple Auth (matching your current logic)
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    
-    console.log(`Login attempt for: ${username}`); // Helpful for debugging
-
-    // Check credentials
-    if (username === 'mcdoadmin' && password === 'macdo2026') {
-        const token = jwt.sign({ username: 'mcdoadmin' }, JWT_SECRET, { expiresIn: '12h' });
-        res.json({ success: true, token, username: 'mcdoadmin' });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
+// Simple Auth - No longer needed (only security password in frontend)
+app.post('/api/auth', (req, res) => {
+    // This endpoint is for future use or to maintain compatibility
+    res.json({ success: true, message: 'Security verification already handled on frontend' });
 });
 
 // Serve Static Files from the current directory
