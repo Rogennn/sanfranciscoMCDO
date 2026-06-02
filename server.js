@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const path = require('path');
@@ -28,37 +28,37 @@ app.use((req, res, next) => {
 // Secret key for JWT - In production, use an environment variable (process.env.JWT_SECRET)
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
-// SQLite Database Connection
-const db = new sqlite3.Database(path.join(__dirname, 'mcdo_db.sqlite'), (err) => {
-    if (err) {
-        console.error('❌ SQLite database error:', err.message);
-    } else {
-        console.log('✅ SQLite Database connected successfully.');
-        initializeDatabase();
-    }
+// PostgreSQL Database Connection
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-// Enable foreign keys
-db.run("PRAGMA foreign_keys = ON");
+pool.on('error', (err) => {
+    console.error('❌ PostgreSQL pool error:', err);
+});
+
+pool.on('connect', () => {
+    console.log('✅ PostgreSQL Database connected successfully.');
+    initializeDatabase();
+});
 
 // Initialize database tables
-function initializeDatabase() {
-    db.serialize(() => {
-        // Calendar Notes Table
-        db.run(`
+async function initializeDatabase() {
+    try {
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS calendar_notes (
                 note_date TEXT PRIMARY KEY,
                 note_text TEXT NOT NULL,
                 note_type TEXT DEFAULT 'general',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
-        // Cooperatives Table
-        db.run(`
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS cooperatives (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 type TEXT,
                 status TEXT,
@@ -78,67 +78,55 @@ function initializeDatabase() {
             )
         `);
 
-        // Announcements Table
-        db.run(`
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS announcements (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 date DATE,
                 content TEXT,
-                image LONGTEXT,
+                image TEXT,
                 status TEXT DEFAULT 'Active',
                 createdBy TEXT
             )
         `);
 
-        // About Content Table
-        db.run(`
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS about_content (
-                id INTEGER PRIMARY KEY DEFAULT 1,
+                id SERIAL PRIMARY KEY,
                 description TEXT,
                 vision TEXT,
                 mission TEXT
             )
-        `, () => {
-            // Ensure at least one row exists
-            db.run(`
-                INSERT OR IGNORE INTO about_content (id, description, vision, mission) 
-                VALUES (1, '', '', '')
-            `);
-        });
+        `);
+
+        // Ensure at least one row exists
+        const result = await pool.query('SELECT id FROM about_content WHERE id = 1');
+        if (result.rows.length === 0) {
+            await pool.query(
+                'INSERT INTO about_content (id, description, vision, mission) VALUES ($1, $2, $3, $4)',
+                [1, '', '', '']
+            );
+        }
 
         console.log('📋 Database tables initialized.');
-    });
+    } catch (err) {
+        console.error('Error initializing database:', err);
+    }
 }
 
-// Helper function to run async database queries
-function runAsync(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, (err) => {
-            if (err) reject(err);
-            else resolve();
-        });
-    });
+// Helper functions for database queries (using promises)
+async function runAsync(sql, params = []) {
+    return pool.query(sql, params);
 }
 
-// Helper function for database queries that return data
-function allAsync(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+async function allAsync(sql, params = []) {
+    const result = await pool.query(sql, params);
+    return result.rows;
 }
 
-// Helper function for single row queries
-function getAsync(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
+async function getAsync(sql, params = []) {
+    const result = await pool.query(sql, params);
+    return result.rows[0];
 }
 
 // Middleware to verify JWT Token
@@ -177,7 +165,7 @@ app.post('/api/notes', authenticateToken, async (req, res) => {
     try {
         await runAsync(
             `INSERT INTO calendar_notes (note_date, note_text, note_type, updated_at) 
-             VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+             VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
              ON CONFLICT(note_date) DO UPDATE SET note_text=excluded.note_text, note_type=excluded.note_type, updated_at=CURRENT_TIMESTAMP`,
             [date, text, type]
         );
@@ -191,7 +179,7 @@ app.post('/api/notes', authenticateToken, async (req, res) => {
 // DELETE a note
 app.delete('/api/notes/:date', authenticateToken, async (req, res) => {
     try {
-        await runAsync("DELETE FROM calendar_notes WHERE note_date = ?", [req.params.date]);
+        await runAsync("DELETE FROM calendar_notes WHERE note_date = $1", [req.params.date]);
         res.json({ message: 'Note deleted' });
     } catch (err) {
         console.error('Error deleting note:', err);
@@ -216,7 +204,7 @@ app.post('/api/about', authenticateToken, async (req, res) => {
     try {
         await runAsync(
             `INSERT INTO about_content (id, description, vision, mission) 
-             VALUES (1, ?, ?, ?)
+             VALUES (1, $1, $2, $3)
              ON CONFLICT(id) DO UPDATE SET description=excluded.description, vision=excluded.vision, mission=excluded.mission`,
             [description, vision, mission]
         );
@@ -255,19 +243,13 @@ app.post('/api/cooperatives', authenticateToken, async (req, res) => {
 
     try {
         if (c.id) {
-            const sql = "UPDATE cooperatives SET name=?, type=?, status=?, members=?, businessActivity=?, products=?, numberMembers=?, dateEstablished=?, businessAddress=?, contactNumber=?, email=?, trainingGeneral=?, boardRows=?, staffRows=?, committeeRows=?, createdBy=? WHERE id=?";
+            const sql = "UPDATE cooperatives SET name=$1, type=$2, status=$3, members=$4, businessActivity=$5, products=$6, numberMembers=$7, dateEstablished=$8, businessAddress=$9, contactNumber=$10, email=$11, trainingGeneral=$12, boardRows=$13, staffRows=$14, committeeRows=$15, createdBy=$16 WHERE id=$17";
             await runAsync(sql, [...data, c.id]);
             res.json({ message: 'Updated successfully' });
         } else {
-            const sql = "INSERT INTO cooperatives (name, type, status, members, businessActivity, products, numberMembers, dateEstablished, businessAddress, contactNumber, email, trainingGeneral, boardRows, staffRows, committeeRows, createdBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-            db.run(sql, data, function(err) {
-                if (err) {
-                    console.error('Error creating cooperative:', err);
-                    res.status(500).json({ error: 'Database error' });
-                } else {
-                    res.json({ id: this.lastID, message: 'Created successfully' });
-                }
-            });
+            const sql = "INSERT INTO cooperatives (name, type, status, members, businessActivity, products, numberMembers, dateEstablished, businessAddress, contactNumber, email, trainingGeneral, boardRows, staffRows, committeeRows, createdBy) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id";
+            const result = await runAsync(sql, data);
+            res.json({ id: result.rows[0].id, message: 'Created successfully' });
         }
     } catch (err) {
         console.error('Error saving cooperative:', err);
@@ -279,7 +261,7 @@ app.delete('/api/cooperatives/:id', authenticateToken, async (req, res) => {
     const id = parseInt(req.params.id);
     
     try {
-        await runAsync("DELETE FROM cooperatives WHERE id = ?", [id]);
+        await runAsync("DELETE FROM cooperatives WHERE id = $1", [id]);
         res.json({ message: 'Deleted' });
     } catch (err) {
         console.error('Error deleting cooperative:', err);
@@ -304,19 +286,13 @@ app.post('/api/announcements', authenticateToken, async (req, res) => {
     
     try {
         if (a.id) {
-            const sql = "UPDATE announcements SET title=?, date=?, content=?, image=?, status=?, createdBy=? WHERE id=?";
+            const sql = "UPDATE announcements SET title=$1, date=$2, content=$3, image=$4, status=$5, createdBy=$6 WHERE id=$7";
             await runAsync(sql, [...data, a.id]);
             res.json({ message: 'Updated successfully' });
         } else {
-            const sql = "INSERT INTO announcements (title, date, content, image, status, createdBy) VALUES (?,?,?,?,?,?)";
-            db.run(sql, data, function(err) {
-                if (err) {
-                    console.error('Error creating announcement:', err);
-                    res.status(500).json({ error: 'Database error' });
-                } else {
-                    res.json({ id: this.lastID, message: 'Created' });
-                }
-            });
+            const sql = "INSERT INTO announcements (title, date, content, image, status, createdBy) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id";
+            const result = await runAsync(sql, data);
+            res.json({ id: result.rows[0].id, message: 'Created' });
         }
     } catch (err) {
         console.error('Error saving announcement:', err);
@@ -328,7 +304,7 @@ app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
     const id = parseInt(req.params.id);
     
     try {
-        await runAsync("DELETE FROM announcements WHERE id = ?", [id]);
+        await runAsync("DELETE FROM announcements WHERE id = $1", [id]);
         res.json({ message: 'Deleted' });
     } catch (err) {
         console.error('Error deleting announcement:', err);
@@ -368,15 +344,16 @@ app.use(express.static(path.join(__dirname, '.')));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📦 SQLite Database: mcdo_db.sqlite`);
+    console.log(`📦 PostgreSQL Database: Connected via DATABASE_URL`);
 });
 
 /**
  * Instructions:
  * 1. Run 'npm install'
- * 2. Run 'node server.js'
+ * 2. Set DATABASE_URL environment variable (from Supabase/PostgreSQL)
+ * 3. Run 'node server.js'
  * 
  * Data Persistence:
- * - All data is stored in mcdo_db.sqlite
+ * - All data is stored in PostgreSQL database
  * - Data persists across server restarts
  */
