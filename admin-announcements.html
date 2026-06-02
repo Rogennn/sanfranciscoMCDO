@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Announcements - MCDO Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --maroon:#6b0000;
+        --maroon-dark:#4a0000;
+        --light:#f7f7f7;
+        --text:#333;
+    }
+
+    body{
+        font-family:'Source Sans 3',sans-serif;
+        margin:0;
+        background:#f2f2f2;
+        color:var(--text);
+    }
+
+    /* HEADER */
+    .gov-header{
+        background:var(--maroon);
+        padding:10px 0;
+    }
+
+    .seal-img{
+        width:70px;
+        height:70px;
+        border-radius:50%;
+        object-fit:cover;
+    }
+
+    .gov-text{
+        color:white;
+        line-height:1.3;
+    }
+
+    .line1{ font-size:.75rem; }
+    .line2{ font-size:.9rem; font-weight:600; }
+    .line3{ font-size:1.3rem; font-family:'Playfair Display',serif; font-weight:700; }
+
+    /* DASHBOARD NAVBAR */
+    .dashboard-nav{
+        background:white;
+        box-shadow:0 2px 10px rgba(0,0,0,0.08);
+        padding:15px 0;
+    }
+
+    .navbar-brand{ font-weight:700; color:var(--maroon)!important; }
+    .nav-link{ color:#444!important; font-weight:600; margin-left:10px; }
+    .nav-link:hover, .nav-link.active{ color:var(--maroon)!important; }
+
+    /* MAIN CONTENT */
+    .main-content{ padding:10px; }
+
+    .welcome-card{
+        background:linear-gradient(135deg,var(--maroon) 0%,var(--maroon-dark) 100%);
+        color:white;
+        border-radius: 15px;
+        width:100%;
+        padding:50px;
+        margin-bottom:50px;
+    }
+
+    .welcome-card h2{ font-family:'Playfair Display',serif; font-weight: 900;margin-bottom:10px; }
+
+    .card { border-radius: 10px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
+    .btn-maroon { background: var(--maroon); color: white; font-weight: 600; }
+    .btn-maroon:hover { background: var(--maroon-dark); color: white; }
+
+    /* ANNOUNCEMENT CARDS */
+    .announcement-card {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .announcement-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .announcement-card-image {
+        width: 40%;
+        min-width: 250px;
+        height: 250px;
+        background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .announcement-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .announcement-card-image-placeholder {
+        color: white;
+        font-size: 3rem;
+        opacity: 0.3;
+    }
+
+    .announcement-card-content {
+        flex: 1;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .announcement-card-date {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+
+    .announcement-card-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--maroon);
+        margin: 0 0 12px 0;
+        font-family: 'Playfair Display', serif;
+        line-height: 1.3;
+    }
+
+    .announcement-card-description {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .announcement-card-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+    }
+
+    .announcement-card-btn {
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .announcement-card-btn-primary {
+        background: #1a365d;
+        color: white;
+    }
+
+    .announcement-card-btn-primary:hover {
+        background: #2c5282;
+    }
+
+    .announcement-card-btn-secondary {
+        background: #f0f0f0;
+        color: #555;
+    }
+
+    .announcement-card-btn-secondary:hover {
+        background: #e0e0e0;
+    }
+
+    .announcement-card-btn-danger {
+        background: #fff0f0;
+        color: #c0392b;
+    }
+
+    .announcement-card-btn-danger:hover {
+        background: #ffe0e0;
+    }
+
+    @media (max-width: 768px) {
+        .announcement-card {
+            flex-direction: column;
+        }
+
+        .announcement-card-image {
+            width: 100%;
+            min-width: auto;
+            height: 200px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="gov-header">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3">
+            <img src="sfq-logo.jpg" class="seal-img">
+            <div class="gov-text">
+                <div class="line1">REPUBLIC OF THE PHILIPPINES</div>
+                <div class="line2">PROVINCE OF QUEZON</div>
+                <div class="line3">MUNICIPALITY OF SAN FRANCISCO</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- DASHBOARD NAVBAR -->
+<nav class="navbar navbar-expand-lg dashboard-nav">
+    <div class="container">
+        <a class="navbar-brand" href="admin.html">
+            <i class="fas fa-landmark"></i>
+            MCDO Admin Dashboard
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="admin.html"><i class="fas fa-home"></i> Dashboard</a>
+                </li>
+                   <li class="nav-item">
+                    <a class="nav-link" href="admin-about.html"><i class="fas fa-info-circle"></i> About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="admin-cooperatives.html"><i class="fas fa-users"></i> Cooperatives</a>
+                </li>
+            
+                <li class="nav-item">
+                    <a class="nav-link active" href="admin-announcements.html"><i class="fas fa-bullhorn"></i> Announcements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- WELCOME CARD -->
+<div class="container mt-4">
+    <div class="welcome-card">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>Announcements Management</h2>
+                <p>Post updates and manage news for the community</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card p-4 mb-4">
+                <h5 class="fw-bold mb-3" style="color:var(--maroon)">
+                    <i class="fas fa-plus-circle me-2"></i>Post New Announcement
+                </h5>
+                <form id="announcement-form">
+                    <input type="hidden" id="announcement-id">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="title" class="form-control" required placeholder="e.g. General Assembly">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="date" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Content</label>
+                        <textarea id="content" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Announcement Image</label>
+                        <input type="file" id="image" class="form-control" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-maroon w-100">Post Announcement</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="color:var(--maroon)">
+                        <i class="fas fa-list me-2"></i>Existing Announcements
+                    </h5>
+                    <button class="btn btn-sm btn-outline-danger" onclick="clearAllAnn()"><i class="fas fa-eraser me-1"></i> Clear All</button>
+                </div>
+                <div id="announcements-cards-container">
+                    <!-- Announcement cards rendered by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced security: Check both login status AND security verification
+if (localStorage.getItem('adminLoggedIn') !== 'true' || localStorage.getItem('accessVerified') !== 'true') {
+    localStorage.clear(); // Clear any partial login attempts
+    window.location.href = 'login.html';
+}
+
+const API_URL = '/api';
+const form = document.getElementById('announcement-form');
+let announcements = [];
+
+function getAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+    };
+}
+
+async function fetchAnnouncements() {
+    try {
+        const res = await fetch(`${API_URL}/announcements`);
+        announcements = await res.json();
+        loadAdminList();
+    } catch(e) { console.error(e); }
+}
+
+function loadAdminList() {
+    const container = document.getElementById('announcements-cards-container');
+    container.innerHTML = '';
+    announcements.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(ann => {
+        const card = document.createElement('div');
+        card.className = 'announcement-card';
+        card.innerHTML = `
+            <div class="announcement-card-image">
+                ${ann.image ? `<img src="${ann.image}" alt="${ann.title}">` : '<i class="fas fa-bullhorn announcement-card-image-placeholder"></i>'}
+            </div>
+            <div class="announcement-card-content">
+                <div class="announcement-card-date">Posted on ${new Date(ann.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                <h3 class="announcement-card-title">${ann.title}</h3>
+                <p class="announcement-card-description">${ann.content || 'No content available'}</p>
+                <div class="announcement-card-actions">
+                    <button class="announcement-card-btn announcement-card-btn-primary" onclick="viewAnnouncement(${ann.id})">
+                        <i class="fas fa-eye"></i> Read More
+                    </button>
+                    <button class="announcement-card-btn announcement-card-btn-secondary" onclick="editAnn(${ann.id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="announcement-card-btn announcement-card-btn-danger" onclick="deleteAnn(${ann.id})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+form.onsubmit = (e) => {
+    e.preventDefault();
+    
+    const id = document.getElementById('announcement-id').value;
+    const title = document.getElementById('title').value;
+    const date = document.getElementById('date').value;
+    const content = document.getElementById('content').value;
+    const imageFile = document.getElementById('image').files[0];
+    
+    const saveAnnouncement = async (imageData) => {
+        const data = {
+            title, date, content, image: imageData,
+            status: 'Active',
+            createdBy: localStorage.getItem('adminUsername') || 'admin'
+        };
+        if (id) data.id = parseInt(id);
+
+        try {
+            const res = await fetch(`${API_URL}/announcements`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (!res.ok) throw new Error('Save failed');
+            await fetchAnnouncements();
+        } catch(e) { alert(e.message); return; }
+        
+        form.reset();
+        document.getElementById('announcement-id').value = '';
+        form.querySelector('button[type="submit"]').textContent = 'Post Announcement';
+        loadAdminList();
+        alert(id ? 'Announcement updated successfully!' : 'Announcement posted successfully!');
+    };
+
+    if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = (event) => saveAnnouncement(event.target.result);
+        reader.readAsDataURL(imageFile);
+    } else {
+        saveAnnouncement(null);
+    }
+};
+
+function viewAnnouncement(id) {
+    const ann = announcements.find(a => a.id === id);
+    if (!ann) return;
+    
+    alert(`Title: ${ann.title}\n\nDate: ${ann.date}\n\nContent:\n${ann.content}`);
+}
+
+function editAnn(id) {
+    const ann = announcements.find(a => a.id === id);
+    if (!ann) return;
+
+    document.getElementById('announcement-id').value = ann.id;
+    document.getElementById('title').value = ann.title;
+    document.getElementById('date').value = ann.date;
+    document.getElementById('content').value = ann.content;
+
+    form.querySelector('button[type="submit"]').textContent = 'Update Announcement';
+    form.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function deleteAnn(id) {
+    if(confirm('Delete this announcement?')) {
+        try {
+            const res = await fetch(`${API_URL}/announcements/${id}`, { 
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (!res.ok) throw new Error('Delete failed');
+            fetchAnnouncements();
+        } catch(e) { alert(e.message); }
+    }
+}
+
+async function clearAllAnn() {
+    if(confirm('Are you sure you want to delete ALL announcements? This cannot be undone.')) {
+        try {
+            const res = await fetch(`${API_URL}/announcements`, { 
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+            });
+            if (res.status === 401 || res.status === 403) {
+                window.location.href = 'login.html';
+                return;
+            }
+            fetchAnnouncements();
+        } catch(e) { alert(e.message); }
+    }
+}
+
+function logout() {
+    localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('adminUsername');
+    localStorage.removeItem('accessVerified');
+    window.location.href = 'login.html';
+}
+
+fetchAnnouncements();
+</script>
+</body>
+</html>

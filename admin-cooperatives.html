@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooperatives Management - MCDO San Francisco</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --maroon: #6b0000;
+  --maroon-dark: #4a0000;
+  --maroon-light: #8b0000;
+  --light: #f7f7f7;
+  --text: #333;
+  --border: #e0e0e0;
+  --card-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+* { box-sizing: border-box; }
+body { font-family: 'Source Sans 3', sans-serif; margin: 0; background: #f2f2f2; color: var(--text); }
+
+.gov-header { background: var(--maroon); padding: 10px 0; }
+.seal-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; }
+.gov-text { color: white; line-height: 1.3; }
+.line1 { font-size: .75rem; }
+.line2 { font-size: .9rem; font-weight: 600; }
+.line3 { font-size: 1.3rem; font-family: 'Playfair Display', serif; font-weight: 700; }
+
+.dashboard-nav { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08); padding: 15px 0; }
+.navbar-brand { font-weight: 700; color: var(--maroon) !important; }
+.nav-link { color: #444 !important; font-weight: 600; margin-left: 10px; }
+.nav-link:hover, .nav-link.active { color: var(--maroon) !important; }
+
+#list-view, #form-view { display: none; }
+#list-view.active, #form-view.active { display: block; }
+
+.welcome-card {
+  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+  color: white; border-radius: 15px; padding: 35px 40px; margin-bottom: 25px;
+}
+.welcome-card h2 { font-family: 'Playfair Display', serif; font-weight: 700; margin-bottom: 5px; }
+
+.action-card { background: white; border-radius: 15px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 20px; }
+.action-card h5 { color: var(--maroon); font-weight: 700; margin-bottom: 15px; }
+
+.action-btn {
+  background: var(--maroon); color: white;
+  padding: 10px 20px; border-radius: 8px;
+  text-decoration: none; font-weight: 600;
+  display: inline-block; transition: all .3s;
+  margin-right: 10px; margin-bottom: 10px;
+  border: none; cursor: pointer; font-size: 14px;
+}
+.action-btn:hover { background: var(--maroon-dark); color: white; }
+.action-btn-secondary { background: white; color: var(--maroon); border: 2px solid var(--maroon); }
+.action-btn-secondary:hover { background: var(--maroon); color: white; }
+
+.form-header-bar {
+  background: var(--maroon); color: white;
+  padding: 18px 30px; display: flex;
+  justify-content: space-between; align-items: center;
+  border-radius: 10px 10px 0 0; margin-bottom: 0;
+}
+.form-header-bar h2 { font-family: 'Playfair Display', serif; font-weight: 700; margin: 0; font-size: 1.4rem; }
+.form-header-bar p { margin: 2px 0 0; opacity: .85; font-size: .85rem; }
+.back-btn {
+  background: rgba(255,255,255,0.15); color: white;
+  border: 1px solid rgba(255,255,255,.4);
+  padding: 8px 18px; border-radius: 6px;
+  font-weight: 600; cursor: pointer;
+  transition: all .3s; font-size: 13px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.back-btn:hover { background: white; color: var(--maroon); }
+
+.form-wrapper {
+  background: white; border-radius: 0 0 10px 10px;
+  padding: 28px 30px 0; box-shadow: var(--card-shadow);
+}
+
+.form-section-title {
+  color: var(--maroon); font-weight: 700; font-size: 1rem;
+  margin: 0 0 12px; padding-bottom: 8px;
+  border-bottom: 2px solid #f0e8e8;
+}
+
+.top-info-row { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+.field-label {
+  font-size: .78rem; font-weight: 700; color: #555;
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: .03em;
+}
+.field-label .req { color: var(--maroon); }
+.flat-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; font-size: .88rem; background: #fafafa; color: #333;
+  outline: none; transition: border-color .2s; font-family: 'Source Sans 3', sans-serif;
+}
+.flat-input:focus { border-color: var(--maroon); background: white; box-shadow: 0 0 0 3px rgba(107,0,0,.07); }
+.flat-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
+}
+
+.officers-flat-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+.officers-flat-table thead th {
+  font-size: .72rem; font-weight: 700; color: #888;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 6px 10px; background: #f8f8f8; border-bottom: 1.5px solid var(--border);
+}
+.officers-flat-table tbody tr { border-bottom: 1px solid #f0f0f0; }
+.officers-flat-table tbody tr:last-child { border-bottom: none; }
+.officers-flat-table tbody td { padding: 6px 8px; vertical-align: middle; }
+.table-input {
+  width: 100%; border: none; background: transparent;
+  font-size: .88rem; color: #333; outline: none;
+  padding: 4px 6px; border-radius: 4px;
+  font-family: 'Source Sans 3', sans-serif; transition: background .15s;
+}
+.table-input:focus { background: #fff5f5; outline: 1px solid #c0a0a0; }
+.table-input::placeholder { color: #bbb; }
+
+.tbl-delete-btn {
+  background: none; border: none; cursor: pointer;
+  color: #ccc; padding: 4px 7px; border-radius: 4px;
+  transition: color .2s, background .2s; font-size: .85rem;
+  display: flex; align-items: center;
+}
+.tbl-delete-btn:hover { color: #c0392b; background: #fff0f0; }
+
+.add-row-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: white; border: 1.5px solid var(--maroon);
+  color: var(--maroon); border-radius: 6px;
+  padding: 6px 14px; font-size: .8rem; font-weight: 700;
+  cursor: pointer; transition: all .2s; margin-top: 10px;
+}
+.add-row-btn:hover { background: var(--maroon); color: white; }
+
+.training-single-wrap { margin-bottom: 24px; }
+
+.committee-search-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.committee-search-input {
+  flex: 1; border: 1.5px solid var(--border); border-radius: 6px;
+  padding: 8px 12px; font-size: .88rem; background: #fafafa;
+  outline: none; transition: border-color .2s; font-family: 'Source Sans 3', sans-serif;
+}
+.committee-search-input:focus { border-color: var(--maroon); background: white; }
+.add-committee-btn {
+  background: var(--maroon); color: white; border: none; border-radius: 6px;
+  padding: 8px 16px; font-size: .82rem; font-weight: 700; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: background .2s; white-space: nowrap;
+}
+.add-committee-btn:hover { background: var(--maroon-dark); }
+
+.committees-flat-table { width: 100%; border-collapse: collapse; }
+.committees-flat-table thead th {
+  font-size: .72rem; font-weight: 700; color: #888;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 6px 10px; background: #f8f8f8; border-bottom: 1.5px solid var(--border);
+}
+.committees-flat-table tbody tr { border-bottom: 1px solid #f0f0f0; }
+.committees-flat-table tbody tr:last-child { border-bottom: none; }
+.committees-flat-table tbody td { padding: 6px 8px; vertical-align: middle; }
+
+.form-footer {
+  background: white; border-top: 1px solid var(--border);
+  padding: 16px 30px; display: flex; justify-content: flex-end; gap: 12px;
+  position: sticky; bottom: 0; z-index: 10;
+  border-radius: 0 0 10px 10px; box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+}
+.btn-cancel {
+  background: #f0f0f0; color: #555; border: none; border-radius: 8px;
+  padding: 10px 24px; font-weight: 600; cursor: pointer; transition: all .2s; font-size: .9rem;
+}
+.btn-cancel:hover { background: #e0e0e0; }
+.btn-save {
+  background: var(--maroon); color: white; border: none; border-radius: 8px;
+  padding: 10px 28px; font-weight: 700; cursor: pointer; transition: all .2s; font-size: .9rem;
+}
+.btn-save:hover { background: var(--maroon-dark); }
+
+.cooperatives-cards-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+.cooperative-card {
+  background: white; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e0e0e0;
+}
+.cooperative-card:hover { transform: translateY(-3px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+.cooperative-card-image {
+  width: 100%; height: 150px;
+  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.cooperative-card-image-placeholder { color: white; font-size: 2.5rem; opacity: 0.25; }
+.cooperative-card-content { padding: 18px 20px; }
+.cooperative-card-date { font-size: 0.78rem; color: #888; margin-bottom: 6px; font-weight: 500; }
+.cooperative-card-title { font-size: 1.05rem; font-weight: 700; color: var(--maroon); margin: 0 0 8px; font-family: 'Playfair Display', serif; }
+.cooperative-card-description {
+  font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 12px;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cooperative-card-meta { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.cooperative-card-badge { font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+.cooperative-card-badge.active { background: #d4edda; color: #155724; }
+.cooperative-card-badge.under-review { background: #fff3cd; color: #856404; }
+.cooperative-card-badge.inactive { background: #e2e3e5; color: #383d41; }
+.cooperative-card-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+.cooperative-card-btn {
+  flex: 1; padding: 7px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; border: none;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.cooperative-card-btn-primary { background: var(--maroon); color: white; }
+.cooperative-card-btn-primary:hover { background: var(--maroon-dark); }
+.cooperative-card-btn-secondary { background: #f0f0f0; color: #555; }
+.cooperative-card-btn-secondary:hover { background: #e0e0e0; }
+.cooperative-card-btn-danger { background: #fff0f0; color: #c0392b; }
+.cooperative-card-btn-danger:hover { background: #ffe0e0; }
+
+.modal-header { background: var(--maroon); color: white; }
+
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.row-animate { animation: fadeSlideIn .2s ease; }
+.section-divider { border: none; border-top: 1.5px solid #f0e8e8; margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<header class="gov-header">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3">
+      <img src="sfq-logo.jpg" class="seal-img" alt="Seal">
+      <div class="gov-text">
+        <div class="line1">REPUBLIC OF THE PHILIPPINES</div>
+        <div class="line2">PROVINCE OF QUEZON</div>
+        <div class="line3">MUNICIPALITY OF SAN FRANCISCO</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="navbar navbar-expand-lg dashboard-nav">
+  <div class="container">
+    <a class="navbar-brand" href="admin.html"><i class="fas fa-landmark me-2"></i>MCDO Admin Dashboard</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="admin.html"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link active" href="admin-cooperatives.html"><i class="fas fa-users me-1"></i>Cooperatives</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin-about.html"><i class="fas fa-info-circle me-1"></i>About</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin-announcements.html"><i class="fas fa-bullhorn me-1"></i>Announcements</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4 pb-5">
+
+  <!-- LIST VIEW -->
+  <div id="list-view" class="active">
+    <div class="welcome-card">
+      <h2>Cooperatives Management</h2>
+      <p class="mb-0">Create, edit, and manage cooperative information</p>
+    </div>
+    <div class="action-card">
+      <h5><i class="fas fa-users me-2"></i>Cooperatives List</h5>
+      <div class="cooperatives-cards-container" id="cooperatives-cards-container"></div>
+      <div class="mt-3">
+        <button class="action-btn" onclick="showCreateForm()"><i class="fas fa-plus me-2"></i>Add New Cooperative</button>
+        <button class="action-btn action-btn-secondary" onclick="exportCooperatives()"><i class="fas fa-download me-2"></i>Export List</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM VIEW -->
+  <div id="form-view">
+    <input type="hidden" id="cooperative-id">
+
+    <div class="form-header-bar">
+      <div>
+        <h2 id="form-title">Create New Cooperative</h2>
+        <p>Fill in the details below to register a new cooperative.</p>
+      </div>
+      <button class="back-btn" onclick="showListView()"><i class="fas fa-arrow-left"></i> Back to Cooperatives List</button>
+    </div>
+
+    <div class="form-wrapper">
+
+      <div class="top-info-row">
+        <div>
+          <div class="field-label">Cooperative Name <span class="req">*</span></div>
+          <input type="text" class="flat-input" id="cooperative-name" placeholder="Enter cooperative name">
+        </div>
+        <div>
+          <div class="field-label">Business Activity <span class="req">*</span></div>
+          <input type="text" class="flat-input" id="business-activity" placeholder="Enter business activity">
+        </div>
+        <div>
+          <div class="field-label">Products</div>
+          <input type="text" class="flat-input" id="products" placeholder="e.g. Rice, Corn, Snacks">
+        </div>
+        <div>
+          <div class="field-label">Number of Members <span class="req">*</span></div>
+          <input type="text" class="flat-input" id="number-members" placeholder="e.g. 1,619">
+        </div>
+      </div>
+
+      <div class="top-info-row" style="grid-template-columns:1fr 1fr 1fr 1fr; margin-bottom:24px;">
+        <div>
+          <div class="field-label">Type <span class="req">*</span></div>
+          <select class="flat-input flat-select" id="cooperative-type">
+            <option value="">Select type</option>
+            <option>Multi-Purpose</option><option>Agricultural</option><option>Transport</option>
+            <option>Livelihood</option><option>Entrepreneurship</option><option>Lending</option>
+            <option>Consumer</option><option>Housing</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-label">Status <span class="req">*</span></div>
+          <select class="flat-input flat-select" id="cooperative-status">
+            <option value="Active">Active</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-label">Date Established</div>
+          <input type="date" class="flat-input" id="date-established">
+        </div>
+        <div>
+          <div class="field-label">Contact Number</div>
+          <input type="text" class="flat-input" id="contact-number" placeholder="Enter contact number">
+        </div>
+      </div>
+
+      <div class="top-info-row" style="grid-template-columns:2fr 2fr; margin-bottom:24px;">
+        <div>
+          <div class="field-label">Business Address</div>
+          <input type="text" class="flat-input" id="business-address" placeholder="Enter complete address">
+        </div>
+        <div>
+          <div class="field-label">Email</div>
+          <input type="text" class="flat-input" id="email" placeholder="Enter email address">
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="form-section-title"><i class="fas fa-users me-2"></i>Board of Directors</div>
+      <table class="officers-flat-table">
+        <thead>
+          <tr>
+            <th style="width:35%">Position</th>
+            <th>Name</th>
+            <th style="width:30%">Training Attended</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody id="board-tbody"></tbody>
+      </table>
+      <button class="add-row-btn" onclick="addBoardRow()"><i class="fas fa-plus"></i> Add Board Member</button>
+
+      <hr class="section-divider">
+
+      <div class="form-section-title"><i class="fas fa-user-tie me-2"></i>Management Staff</div>
+      <table class="officers-flat-table">
+        <thead>
+          <tr>
+            <th style="width:35%">Position</th>
+            <th>Name</th>
+            <th style="width:30%">Training Attended</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody id="staff-tbody"></tbody>
+      </table>
+      <button class="add-row-btn" onclick="addStaffRow()"><i class="fas fa-plus"></i> Add Management Staff</button>
+
+      <hr class="section-divider">
+
+      <div class="form-section-title"><i class="fas fa-graduation-cap me-2"></i>Training Attended (General)</div>
+      <div class="training-single-wrap">
+        <input type="text" class="flat-input" id="training-general" placeholder="Enter training name">
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="form-section-title"><i class="fas fa-sitemap me-2"></i>Committees</div>
+      <div class="committee-search-bar">
+        <input type="text" class="committee-search-input" id="committee-search" placeholder="Search position to add..." oninput="filterCommittees()">
+        <button class="add-committee-btn" onclick="addCommitteeRow()"><i class="fas fa-plus"></i> Add Committee</button>
+      </div>
+      <table class="committees-flat-table">
+        <thead>
+          <tr>
+            <th style="width:22%">Committee</th>
+            <th style="width:18%">Position</th>
+            <th style="width:20%">Name</th>
+            <th style="width:22%">Members (comma separated)</th>
+            <th style="width:12%">Role</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody id="committees-tbody"></tbody>
+      </table>
+      <button class="add-row-btn" onclick="addCommitteeRow()"><i class="fas fa-plus"></i> Add Committee Row</button>
+
+      <div style="height:20px;"></div>
+    </div>
+
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="showListView()">Cancel</button>
+      <button class="btn-save" onclick="saveCooperative()"><i class="fas fa-save me-2"></i>Save Cooperative</button>
+    </div>
+  </div>
+
+  <!-- VIEW MODAL -->
+  <div class="modal fade" id="viewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cooperative Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="view-content"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ---- CONSTANTS (defined once) ----
+const DEFAULT_COMMITTEES = [
+  { committee: 'AUDIT & INVENTORY COMMITTEE',    position: 'Chairman', name: '', members: '', role: '' },
+  { committee: 'ELECTION COMMITTEE',             position: 'Chairman', name: '', members: '', role: '' },
+  { committee: 'ETHICS COMMITTEE',               position: 'Chairman', name: '', members: '', role: '' },
+  { committee: 'EDUCATION COMMITTEE',            position: 'Chairman', name: '', members: '', role: '' },
+  { committee: 'MEDIATION COMMITTEE',            position: 'Chairman', name: '', members: '', role: '' },
+  { committee: 'GENDER & DEVELOPMENT COMMITTEE', position: 'Chairman', name: '', members: '', role: '' },
+];
+
+// ---- STATE (defined once) ----
+const API_URL = '/api';
+let cooperatives = [];
+let boardRows    = [];
+let staffRows    = [];
+let committeeRows = [];
+
+function getAuthHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+  };
+}
+
+// ---- INIT ----
+window.onload = function () {
+  // Enhanced security: Check both login status AND security verification
+  if (localStorage.getItem('adminLoggedIn') !== 'true' || localStorage.getItem('accessVerified') !== 'true') {
+    localStorage.clear(); // Clear any partial login attempts
+    window.location.href = 'login.html';
+    return;
+  }
+  fetchCooperatives();
+};
+
+async function fetchCooperatives() {
+  try {
+    const res = await fetch(`${API_URL}/cooperatives`);
+    cooperatives = await res.json();
+    loadCooperatives();
+  } catch(e) { console.error(e); }
+}
+
+
+function logout() {
+  localStorage.removeItem('adminLoggedIn');
+  localStorage.removeItem('adminUsername');
+  localStorage.removeItem('accessVerified');
+  window.location.href = 'login.html';
+}
+
+// ---- VIEW SWITCHING ----
+function showListView() {
+  document.getElementById('list-view').classList.add('active');
+  document.getElementById('form-view').classList.remove('active');
+  fetchCooperatives();
+}
+
+function showCreateForm() {
+  document.getElementById('cooperative-id').value = '';
+  document.getElementById('form-title').textContent = 'Create New Cooperative';
+  ['cooperative-name','business-activity','products','number-members',
+   'business-address','contact-number','email','training-general'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('cooperative-type').value = '';
+  document.getElementById('cooperative-status').value = 'Active';
+  document.getElementById('date-established').value = '';
+  boardRows     = [];
+  staffRows     = [];
+  committeeRows = JSON.parse(JSON.stringify(DEFAULT_COMMITTEES));
+  renderBoardTable();
+  renderStaffTable();
+  renderCommitteeTable();
+  document.getElementById('list-view').classList.remove('active');
+  document.getElementById('form-view').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ---- LIST ----
+function loadCooperatives() {
+  const container = document.getElementById('cooperatives-cards-container');
+  container.innerHTML = '';
+  const admin = localStorage.getItem('adminUsername') || 'admin';
+  const filtered = cooperatives.filter(c => c.createdBy === admin);
+  if (filtered.length === 0) {
+    container.innerHTML = '<p style="color:#888;font-size:.9rem;">No cooperatives found. Click "Add New Cooperative" to get started.</p>';
+    return;
+  }
+  filtered.forEach(coop => {
+    const statusClass = coop.status === 'Active' ? 'active' : coop.status === 'Under Review' ? 'under-review' : 'inactive';
+    const card = document.createElement('div');
+    card.className = 'cooperative-card';
+    card.innerHTML = `
+      <div class="cooperative-card-image"><i class="fas fa-landmark cooperative-card-image-placeholder"></i></div>
+      <div class="cooperative-card-content">
+        <div class="cooperative-card-date">Established: ${coop.dateEstablished ? new Date(coop.dateEstablished).toLocaleDateString() : 'N/A'}</div>
+        <h3 class="cooperative-card-title">${coop.name}</h3>
+        <p class="cooperative-card-description">${coop.businessActivity || 'No business activity specified'}</p>
+        <div class="cooperative-card-meta">
+          <span class="cooperative-card-badge ${statusClass}">${coop.status}</span>
+          <span class="cooperative-card-badge" style="background:#e9ecef;color:#495057;">${coop.type}</span>
+          <span class="cooperative-card-badge" style="background:#e9ecef;color:#495057;">${coop.members || '0'} Members</span>
+        </div>
+        <div class="cooperative-card-actions">
+          <button class="cooperative-card-btn cooperative-card-btn-primary" onclick="viewCooperative(${coop.id})"><i class="fas fa-eye"></i> View</button>
+          <button class="cooperative-card-btn cooperative-card-btn-secondary" onclick="editCooperative(${coop.id})"><i class="fas fa-edit"></i> Edit</button>
+          <button class="cooperative-card-btn cooperative-card-btn-danger" onclick="deleteCooperative(${coop.id})"><i class="fas fa-trash"></i> Delete</button>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+// ---- RENDER OFFICER TABLES ----
+function makeOfficerRow(arr, idx, tbodyId) {
+  const arrayName = tbodyId === 'board-tbody' ? 'boardRows' : 'staffRows';
+  const tr = document.createElement('tr');
+  tr.className = 'row-animate';
+  tr.innerHTML = `
+    <td><input class="table-input" value="${escHtml(arr[idx].position)}" oninput="${arrayName}[${idx}].position=this.value" placeholder="Enter Position"></td>
+    <td><input class="table-input" value="${escHtml(arr[idx].name)}"     oninput="${arrayName}[${idx}].name=this.value"     placeholder="Enter Name"></td>
+    <td><input class="table-input" value="${escHtml(arr[idx].training)}" oninput="${arrayName}[${idx}].training=this.value" placeholder="Training Attended"></td>
+    <td><button class="tbl-delete-btn" onclick="removeOfficerRow('${tbodyId}',${idx})"><i class="fas fa-trash-alt"></i></button></td>`;
+  return tr;
+}
+
+function renderBoardTable() {
+  const tbody = document.getElementById('board-tbody');
+  tbody.innerHTML = '';
+  boardRows.forEach((_, i) => tbody.appendChild(makeOfficerRow(boardRows, i, 'board-tbody')));
+}
+
+function renderStaffTable() {
+  const tbody = document.getElementById('staff-tbody');
+  tbody.innerHTML = '';
+  staffRows.forEach((_, i) => tbody.appendChild(makeOfficerRow(staffRows, i, 'staff-tbody')));
+}
+
+function addBoardRow() {
+  boardRows.push({ position: '', name: '', training: '' });
+  renderBoardTable();
+  focusLastRow('board-tbody');
+}
+
+function addStaffRow() {
+  staffRows.push({ position: '', name: '', training: '' });
+  renderStaffTable();
+  focusLastRow('staff-tbody');
+}
+
+function removeOfficerRow(tbodyId, idx) {
+  if (tbodyId === 'board-tbody') { boardRows.splice(idx, 1); renderBoardTable(); }
+  else { staffRows.splice(idx, 1); renderStaffTable(); }
+}
+
+function focusLastRow(tbodyId) {
+  setTimeout(() => {
+    const rows = document.getElementById(tbodyId).querySelectorAll('tr');
+    if (rows.length) rows[rows.length - 1].querySelector('input').focus();
+  }, 50);
+}
+
+// ---- COMMITTEE TABLE ----
+function renderCommitteeTable() {
+  const tbody = document.getElementById('committees-tbody');
+  tbody.innerHTML = '';
+  const q = (document.getElementById('committee-search')?.value || '').toLowerCase();
+  committeeRows.forEach((row, i) => {
+    if (q && !row.committee.toLowerCase().includes(q) && !row.position.toLowerCase().includes(q)) return;
+    const tr = document.createElement('tr');
+    tr.className = 'row-animate';
+    tr.innerHTML = `
+      <td><input class="table-input" value="${escHtml(row.committee)}" oninput="committeeRows[${i}].committee=this.value" placeholder="Committee name"></td>
+      <td><input class="table-input" value="${escHtml(row.position)}"  oninput="committeeRows[${i}].position=this.value"  placeholder="Position"></td>
+      <td><input class="table-input" value="${escHtml(row.name)}"      oninput="committeeRows[${i}].name=this.value"      placeholder="Name"></td>
+      <td><input class="table-input" value="${escHtml(row.members)}"   oninput="committeeRows[${i}].members=this.value"   placeholder="Members (comma separated)"></td>
+      <td><input class="table-input" value="${escHtml(row.role)}"      oninput="committeeRows[${i}].role=this.value"      placeholder="Role"></td>
+      <td><button class="tbl-delete-btn" onclick="removeCommitteeRow(${i})"><i class="fas fa-trash-alt"></i></button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function addCommitteeRow() {
+  committeeRows.push({ committee: '', position: '', name: '', members: '', role: '' });
+  renderCommitteeTable();
+  setTimeout(() => {
+    const rows = document.getElementById('committees-tbody').querySelectorAll('tr');
+    if (rows.length) rows[rows.length - 1].querySelector('input').focus();
+  }, 50);
+}
+
+function removeCommitteeRow(i) { committeeRows.splice(i, 1); renderCommitteeTable(); }
+function filterCommittees() { renderCommitteeTable(); }
+
+// ---- HELPERS ----
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+// ---- SAVE ----
+async function saveCooperative() {
+  const name = getVal('cooperative-name').trim();
+  const type = getVal('cooperative-type');
+  if (!name || !type) { alert('Please fill in the required fields (Name and Type).'); return; }
+
+  const data = {
+    name, type,
+    status:          getVal('cooperative-status'),
+    members:         getVal('number-members') || '0',
+    businessActivity:getVal('business-activity'),
+    products:        getVal('products'),
+    numberMembers:   getVal('number-members'),
+    dateEstablished: getVal('date-established'),
+    businessAddress: getVal('business-address'),
+    contactNumber:   getVal('contact-number'),
+    email:           getVal('email'),
+    trainingGeneral: getVal('training-general'),
+    boardRows:       JSON.parse(JSON.stringify(boardRows)),
+    staffRows:       JSON.parse(JSON.stringify(staffRows)),
+    committeeRows:   JSON.parse(JSON.stringify(committeeRows)),
+    createdBy:       localStorage.getItem('adminUsername') || 'admin',
+  };
+
+  const id = getVal('cooperative-id');
+  if (id) data.id = parseInt(id);
+
+  try {
+    const res = await fetch(`${API_URL}/cooperatives`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      window.location.href = 'login.html';
+      return;
+    }
+    if (!res.ok) throw new Error('Failed to save');
+  } catch(e) {
+    alert(e.message); return;
+  }
+
+  alert(id ? 'Cooperative updated successfully!' : 'Cooperative added successfully!');
+  showListView();
+}
+
+// ---- EDIT ----
+function editCooperative(id) {
+  const coop = cooperatives.find(c => c.id === id);
+  if (!coop) return;
+  document.getElementById('cooperative-id').value    = coop.id;
+  document.getElementById('form-title').textContent  = 'Edit Cooperative';
+  document.getElementById('cooperative-name').value  = coop.name || '';
+  document.getElementById('cooperative-type').value  = coop.type || '';
+  document.getElementById('cooperative-status').value= coop.status || 'Active';
+  document.getElementById('business-activity').value = coop.businessActivity || '';
+  document.getElementById('products').value          = coop.products || '';
+  document.getElementById('number-members').value    = coop.numberMembers || '';
+  document.getElementById('date-established').value  = coop.dateEstablished || '';
+  document.getElementById('business-address').value  = coop.businessAddress || '';
+  document.getElementById('contact-number').value    = coop.contactNumber || '';
+  document.getElementById('email').value             = coop.email || '';
+  document.getElementById('training-general').value  = coop.trainingGeneral || '';
+  boardRows     = coop.boardRows     ? JSON.parse(JSON.stringify(coop.boardRows))     : [];
+  staffRows     = coop.staffRows     ? JSON.parse(JSON.stringify(coop.staffRows))     : [];
+  committeeRows = coop.committeeRows ? JSON.parse(JSON.stringify(coop.committeeRows)) : JSON.parse(JSON.stringify(DEFAULT_COMMITTEES));
+  renderBoardTable();
+  renderStaffTable();
+  renderCommitteeTable();
+  document.getElementById('list-view').classList.remove('active');
+  document.getElementById('form-view').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ---- VIEW ----
+function viewCooperative(id) {
+  const coop = cooperatives.find(c => c.id === id);
+  if (!coop) return;
+  const sc = coop.status === 'Active' ? 'bg-success' : coop.status === 'Under Review' ? 'bg-warning text-dark' : 'bg-secondary';
+  const boardHtml = (coop.boardRows || []).map(r => `<li><strong>${escHtml(r.position)}:</strong> ${escHtml(r.name) || 'N/A'}</li>`).join('') || '<li>N/A</li>';
+  const staffHtml = (coop.staffRows || []).map(r => `<li><strong>${escHtml(r.position)}:</strong> ${escHtml(r.name) || 'N/A'}</li>`).join('') || '<li>N/A</li>';
+  const comHtml   = (coop.committeeRows || []).map(r => `
+    <div class="col-md-6 mb-3">
+      <div style="border:1px solid #eee;border-radius:8px;padding:12px;">
+        <div style="font-weight:700;font-size:.8rem;color:var(--maroon);text-transform:uppercase;margin-bottom:8px;">${escHtml(r.committee)}</div>
+        <p style="margin:0 0 4px;"><strong>${escHtml(r.position)}:</strong> ${escHtml(r.name) || 'N/A'}</p>
+        <p style="margin:0;"><strong>Members:</strong> ${escHtml(r.members) || 'N/A'}</p>
+      </div>
+    </div>`).join('') || '<p>N/A</p>';
+  document.getElementById('view-content').innerHTML = `
+    <h4 style="color:var(--maroon);">${escHtml(coop.name)}</h4>
+    <p><strong>Type:</strong> ${escHtml(coop.type)} &nbsp;|&nbsp; <span class="badge ${sc}">${coop.status}</span> &nbsp;|&nbsp; <strong>Members:</strong> ${escHtml(coop.members)}</p>
+    <hr>
+    <div class="row mb-3">
+      <div class="col-md-6"><h6 style="color:var(--maroon);font-weight:700;">BUSINESS ACTIVITY</h6><p>${escHtml(coop.businessActivity)||'N/A'}</p></div>
+      <div class="col-md-6"><h6 style="color:var(--maroon);font-weight:700;">PRODUCTS</h6><p>${escHtml(coop.products)||'N/A'}</p></div>
+    </div>
+    <h6 style="color:var(--maroon);font-weight:700;border-bottom:2px solid var(--maroon);padding-bottom:5px;">BOARD OF DIRECTORS</h6>
+    <ul class="list-unstyled mb-3">${boardHtml}</ul>
+    <h6 style="color:var(--maroon);font-weight:700;border-bottom:2px solid var(--maroon);padding-bottom:5px;">MANAGEMENT STAFF</h6>
+    <ul class="list-unstyled mb-3">${staffHtml}</ul>
+    <h6 style="color:var(--maroon);font-weight:700;border-bottom:2px solid var(--maroon);padding-bottom:5px;">COMMITTEES</h6>
+    <div class="row">${comHtml}</div>
+    <h6 style="color:var(--maroon);font-weight:700;border-bottom:2px solid var(--maroon);padding-bottom:5px;margin-top:16px;">TRAINING ATTENDED (GENERAL)</h6>
+    <p>${escHtml(coop.trainingGeneral)||'N/A'}</p>`;
+  new bootstrap.Modal(document.getElementById('viewModal')).show();
+}
+
+// ---- DELETE ----
+async function deleteCooperative(id) {
+  if (confirm('Are you sure you want to delete this cooperative?')) {
+    try {
+      const res = await fetch(`${API_URL}/cooperatives/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (!res.ok) throw new Error('Delete failed');
+      fetchCooperatives();
+    } catch(e) {
+      alert(e.message);
+    }
+  }
+}
+
+// ---- EXPORT ----
+function exportCooperatives() {
+  if (!cooperatives.length) { alert('No cooperatives to export'); return; }
+  let csv = 'Name,Type,Members,Status,Business Activity,Products\n';
+  cooperatives.forEach(c => {
+    csv += `"${c.name}","${c.type}","${c.members}","${c.status}","${c.businessActivity||''}","${c.products||''}"\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'cooperatives_export.csv';
+  a.click();
+}
+
+</script>
+</body>
+</html>

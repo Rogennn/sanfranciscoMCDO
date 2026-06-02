@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Login - MCDO San Francisco</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --maroon:#6b0000;
+    --maroon-dark:#4a0000;
+    --light:#f7f7f7;
+    --text:#333;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Source Sans 3',sans-serif;
+    margin:0;
+    background:linear-gradient(135deg, #f2f2f2 0%, #e0e0e0 100%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* HEADER */
+
+.gov-header{
+    background:var(--maroon);
+    padding:10px 0;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+}
+
+.seal-img{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.gov-text{
+    color:white;
+    line-height:1.3;
+}
+
+.line1{
+    font-size:.75rem;
+}
+
+.line2{
+    font-size:.9rem;
+    font-weight:600;
+}
+
+.line3{
+    font-size:1.3rem;
+    font-family:'Playfair Display',serif;
+    font-weight:700;
+}
+
+/* LOGIN CARD */
+
+.login-container{
+    margin-top:120px;
+    margin-bottom:40px;
+}
+
+.login-card{
+    background:white;
+    border-radius:20px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.15);
+    padding:50px;
+    max-width:450px;
+    margin:0 auto;
+    position:relative;
+    overflow:hidden;
+}
+
+.login-card::before{
+    content:'';
+    position:absolute;
+    top:0;
+    right:0;
+    width:150px;
+    height:150px;
+    background:linear-gradient(135deg,var(--maroon) 0%,rgba(107,0,0,0.1) 100%);
+    border-radius:0 0 0 20px;
+    opacity:0.1;
+}
+
+.login-header{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.login-header i{
+    font-size:3rem;
+    color:var(--maroon);
+    margin-bottom:20px;
+}
+
+.login-header h2{
+    color:var(--maroon);
+    font-weight:700;
+    font-family:'Playfair Display',serif;
+    margin-bottom:10px;
+}
+
+.login-header p{
+    color:#666;
+    font-size:0.95rem;
+}
+
+.form-label{
+    color:var(--text);
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.form-control{
+    padding:12px 15px;
+    border:2px solid #e0e0e0;
+    border-radius:10px;
+    font-size:0.95rem;
+    transition:all 0.3s ease;
+}
+
+.form-control:focus{
+    border-color:var(--maroon);
+    box-shadow:0 0 0 3px rgba(107,0,0,0.1);
+}
+
+.login-btn{
+    background:var(--maroon);
+    color:white;
+    padding:14px 30px;
+    border-radius:10px;
+    border:none;
+    font-weight:700;
+    font-size:1rem;
+    width:100%;
+    transition:all 0.3s ease;
+    margin-top:10px;
+}
+
+.login-btn:hover{
+    background:var(--maroon-dark);
+    color:white;
+    transform:translateY(-2px);
+    box-shadow:0 5px 20px rgba(107,0,0,0.3);
+}
+
+.back-link{
+    text-align:center;
+    margin-top:25px;
+}
+
+.back-link a{
+    color:var(--maroon);
+    text-decoration:none;
+    font-weight:600;
+    transition:all 0.3s ease;
+}
+
+.back-link a:hover{
+    color:var(--maroon-dark);
+    text-decoration:underline;
+}
+
+.alert{
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:20px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+.login-card{
+    padding:35px 25px;
+    margin:0 20px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header class="gov-header">
+<div class="container">
+<div class="d-flex align-items-center gap-3">
+
+<img src="sfq-logo.jpg" class="seal-img">
+
+<div class="gov-text">
+<div class="line1">REPUBLIC OF THE PHILIPPINES</div>
+<div class="line2">PROVINCE OF QUEZON</div>
+<div class="line3">MUNICIPALITY OF SAN FRANCISCO</div>
+</div>
+
+</div>
+</div>
+</header>
+
+<!-- LOGIN CARD -->
+
+<div class="login-container">
+<div class="login-card">
+
+<div class="login-header">
+<i class="fas fa-user-shield"></i>
+<h2 id="cardTitle">Admin Portal Access</h2>
+<p id="cardSubtitle">Municipal Cooperatives Development Office</p>
+</div>
+
+<!-- STEP 1: SECURITY GATE (Password verification) -->
+<div id="securityGate" style="display: block;">
+<form id="securityForm" onsubmit="verifySecurity(event)">
+<div id="securityAlert"></div>
+<p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
+<i class="fas fa-lock me-2" style="color: var(--maroon);"></i>
+<strong>Security Verification Required</strong><br>
+Enter the admin access password to proceed.
+</p>
+<div class="mb-4">
+<label for="accessPassword" class="form-label">Admin Access Password</label>
+<div class="input-group">
+<span class="input-group-text" style="border:2px solid #e0e0e0;border-right:none;background:#f8f9fa;">
+<i class="fas fa-key" style="color:var(--maroon);"></i>
+</span>
+<input type="password" class="form-control" id="accessPassword" placeholder="Enter access password" required style="border-left:none;">
+</div>
+</div>
+<button type="submit" class="login-btn">
+<i class="fas fa-check-circle me-2"></i>Verify Access
+</button>
+</form>
+</div>
+
+<!-- STEP 2: LOGIN FORM -->
+<div id="loginForm" style="display: none;">
+<form id="credentialsForm" onsubmit="handleLogin(event)">
+<div id="alertContainer"></div>
+
+<div class="mb-4">
+<label for="username" class="form-label">Username</label>
+<div class="input-group">
+<span class="input-group-text" style="border:2px solid #e0e0e0;border-right:none;background:#f8f9fa;">
+<i class="fas fa-user" style="color:var(--maroon);"></i>
+</span>
+<input type="text" class="form-control" id="username" placeholder="Enter your username" required style="border-left:none;">
+</div>
+</div>
+
+<div class="mb-4">
+<label for="password" class="form-label">Password</label>
+<div class="input-group">
+<span class="input-group-text" style="border:2px solid #e0e0e0;border-right:none;background:#f8f9fa;">
+<i class="fas fa-lock" style="color:var(--maroon);"></i>
+</span>
+<input type="password" class="form-control" id="password" placeholder="Enter your password" required style="border-left:none;">
+</div>
+</div>
+
+<div class="mb-4">
+<div class="form-check">
+<input class="form-check-input" type="checkbox" id="rememberMe">
+<label class="form-check-label" for="rememberMe">
+Remember me
+</label>
+</div>
+</div>
+
+<button type="submit" class="login-btn">
+<i class="fas fa-sign-in-alt me-2"></i>Login
+</button>
+
+<button type="button" class="login-btn" onclick="goBackToSecurity()" style="background: #999; margin-top: 10px;">
+<i class="fas fa-arrow-left me-2"></i>Back
+</button>
+</form>
+</div>
+
+<div class="back-link">
+<a href="index.html">
+<i class="fas fa-arrow-left me-2"></i>Back to Home
+</a>
+</div>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// STEP 1: SECURITY GATE - Verify initial access password
+function verifySecurity(event) {
+    event.preventDefault();
+    
+    const accessPassword = document.getElementById('accessPassword').value.trim();
+    const securityAlert = document.getElementById('securityAlert');
+    const correctPassword = 'mcdomarian2026';
+    
+    securityAlert.innerHTML = '';
+    
+    if (accessPassword === correctPassword) {
+        // Correct password - show login form and set security verification flag
+        localStorage.setItem('accessVerified', 'true');
+        securityAlert.innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>Access verified! Proceeding to login...
+            </div>
+        `;
+        
+        setTimeout(() => {
+            document.getElementById('securityGate').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('cardTitle').textContent = 'Admin Login';
+            document.getElementById('cardSubtitle').textContent = 'Enter your credentials to continue';
+        }, 800);
+    } else {
+        // Wrong password
+        securityAlert.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Access Denied!</strong> Invalid access password. Try again.
+            </div>
+        `;
+        document.getElementById('accessPassword').value = '';
+        document.getElementById('accessPassword').focus();
+    }
+}
+
+// STEP 2: LOGIN - Verify credentials
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const rememberMe = document.getElementById('rememberMe').checked;
+    const alertContainer = document.getElementById('alertContainer');
+    
+    console.log('Login attempt - Username:', username);
+    
+    alertContainer.innerHTML = '';
+
+    if (window.location.protocol === 'file:') {
+        alertContainer.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Protocol Error:</strong> Please use <a href="http://localhost:3000/login.html">http://localhost:3000/login.html</a>
+            </div>
+        `;
+        return;
+    }
+    
+    if (!username || !password) {
+        alertContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>Please enter both username and password.
+            </div>
+        `;
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            localStorage.setItem('adminLoggedIn', 'true');
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminUsername', data.username);
+            localStorage.setItem('accessVerified', 'true');
+            
+            if (rememberMe) {
+                localStorage.setItem('rememberedUsername', username);
+            } else {
+                localStorage.removeItem('rememberedUsername');
+            }
+
+            console.log('Login session stored successfully');
+            
+            alertContainer.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>Login successful! Redirecting to admin dashboard...
+                </div>
+            `;
+            
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1500);
+        } else {
+            throw new Error(data.message || 'Invalid credentials');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alertContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Login Failed:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Go back to security gate
+function goBackToSecurity() {
+    localStorage.removeItem('accessVerified'); // Clear access verification when going back
+    document.getElementById('securityGate').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('cardTitle').textContent = 'Admin Portal Access';
+    document.getElementById('cardSubtitle').textContent = 'Municipal Cooperatives Development Office';
+    document.getElementById('accessPassword').value = '';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+}
+
+// Check if already logged in
+window.onload = function() {
+    console.log('Checking login status...');
+    const isLoggedIn = localStorage.getItem('adminLoggedIn');
+    const rememberedUser = localStorage.getItem('rememberedUsername');
+    
+    if (rememberedUser && !document.getElementById('username').value) {
+        document.getElementById('username').value = rememberedUser;
+        document.getElementById('rememberMe').checked = true;
+    }
+    
+    if (isLoggedIn === 'true') {
+        console.log('User already logged in, redirecting to admin.html');
+        window.location.href = 'admin.html';
+    }
+};
+</script>
+
+</body>
+</html>

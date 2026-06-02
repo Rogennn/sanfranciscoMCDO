@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - MCDO San Francisco</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --maroon: #6b0000;
+            --maroon-dark: #4a0000;
+            --maroon-mid: #8b1a1a;
+            --maroon-light: rgba(107,0,0,0.08);
+            --accent: #c0392b;
+            --bg: #f0f0f0;
+            --white: #ffffff;
+            --text: #2c2c2c;
+            --text-muted: #7a7a7a;
+            --border: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+        }
+
+        /* ── GOVERNMENT HEADER ── */
+        .gov-header {
+            background: var(--maroon);
+            padding: 10px 0;
+        }
+
+        .gov-header .seal-img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.25);
+        }
+
+        .gov-header .gov-text { color: white; line-height: 1.35; }
+        .gov-header .gov-text .line1 { font-size: 0.78rem; letter-spacing: 0.05em; opacity: 0.85; }
+        .gov-header .gov-text .line2 { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; }
+        .gov-header .gov-text .line3 { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; }
+
+       /* NAVBAR */
+
+.main-nav{
+    background:white;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.navbar-brand{
+    font-weight:700;
+    color:var(--maroon)!important;
+}
+
+.nav-link{
+    color:#444!important;
+    font-weight:600;
+    margin-left:10px;
+    padding: 10px 15px !important;
+}
+
+.nav-link:hover{
+    color:var(--maroon)!important;
+}
+
+.nav-link.active{
+    color:var(--maroon)!important;
+    border-bottom:2px solid var(--maroon);
+}
+        /* ── HERO BANNER ── */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-mid) 60%, #a52929 100%);
+            padding: 56px 0 52px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hero-banner h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .hero-banner p {
+            color: rgba(255,255,255,0.82);
+            font-size: 1rem;
+            max-width: 520px;
+            margin: 0;
+        }
+
+        .mission-vision-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+        
+        .mission-vision-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background: url('building.png') center/cover no-repeat;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .mission-vision-content-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 50px 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23ffffff"/><path d="M0 0L100 100M100 0L0 100" stroke="%23e9ecef" stroke-width="1"/></svg>') repeat;
+            background-size: 20px 20px;
+        }
+        
+        .mission-vision-title {
+            color: #003366;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        
+        .mission-vision-title.vision-title {
+            color: #cc0000;
+        }
+        
+        .mission-vision-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #333;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #003366;
+        }
+        
+        .mission-vision-text.vision-text {
+            border-left-color: #cc0000;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--maroon);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--maroon) 0%, rgba(107,0,0,0.1) 100%);
+            border-radius: 0 0 0 15px;
+            opacity: 0.1;
+        }
+        
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-left-color: var(--accent);
+        }
+        
+        .section-title {
+            color: white;
+            background:var(--maroon);
+            font-weight: bold;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 15px;
+            text-align: center;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 10px;
+            background: var(--maroon-mid);
+        }
+        
+        .org-chart {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .org-level {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .org-title {
+            background: var(--maroon);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .org-positions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .org-position {
+            background: white;
+            border: 2px solid var(--maroon);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            color: var(--text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .org-position img {
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 5%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .contact-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 3px solid var(--maroon);
+        }
+        
+        .contact-item h5 {
+            color: var(--text);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .contact-item p {
+            margin: 0;
+            color: #495057;
+            line-height: 1.6;
+        }
+        
+        .icon-box {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .icon-box i {
+            font-size: 4rem;
+            color: var(--maroon);
+            margin-bottom: 15px;
+        }
+
+        .barangay-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--maroon);
+            transition: all 0.3s ease;
+            cursor: default;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .barangay-item:hover {
+            background: var(--maroon);
+            color: white;
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(107,0,0,0.2);
+        }
+
+        .barangay-item i {
+            color: var(--maroon);
+            transition: color 0.3s ease;
+        }
+
+        .barangay-item:hover i {
+            color: white;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            background: var(--maroon);
+            color: white;
+            padding: 20px 0;
+            margin-top: 80px;
+        }
+
+        .footer h5 {
+            font-weight: 700;
+        }
+
+        .footer p,
+        .footer a {
+            color: rgba(255,255,255,.85);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8rem; }
+            .org-positions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Government Header -->
+    <header class="gov-header">
+        <div class="container">
+            <div class="d-flex align-items-center gap-3">
+                <img src="sfq-logo.jpg" alt="Official Seal" class="seal-img">
+                <div class="gov-text">
+                    <div class="line1">REPUBLIC OF THE PHILIPPINES</div>
+                    <div class="line2">PROVINCE OF QUEZON</div>
+                    <div class="line3">MUNICIPALITY OF SAN FRANCISCO</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-landmark"></i> MCDO San Francisco
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html"><i class="fas fa-home"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="about.html"><i class="fas fa-info-circle"></i> About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="cooperatives.html"><i class="fas fa-users"></i> Cooperatives</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="announcements.html"><i class="fas fa-bullhorn"></i> Announcements</a>
+                    </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="login.html"><i class="fas fa-lock me-1"></i>Admin Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="container position-relative">
+            <h1><i class="fas fa-info-circle me-3" style="font-size:2rem;opacity:0.8;"></i>About Us</h1>
+            <p>Learn more about the Municipal Cooperatives Development Office and our mission to serve the community</p>
+        </div>
+    </div>
+
+    <!-- Mission & Vision Section -->
+    <section class="mission-vision-section">
+        <div class="container mission-vision-content-wrapper">
+            <div class="text-center mb-5">
+                <img src="sfq-logo.jpg" alt="Provincial Seal" class="img-fluid mb-3" style="max-width: 150px;">
+                <h2 class="display-5 fw-bold mb-4" style="color: #003366;">SAN FRANCISCO QUEZON</h2>
+                <p id="about-description" class="lead text-center mx-auto mb-5" style="max-width: 900px; color: #444; line-height: 1.6;"></p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <h3 class="mission-vision-title mb-3">MISSION</h3>
+                    <p class="mission-vision-text" id="about-mission">The Municipal Cooperatives Development Office (MCDO) is committed to promoting and developing sustainable cooperatives in San Francisco, Quezon. We strive to empower communities through cooperative development by providing comprehensive support services, technical assistance, and capacity building programs that enable cooperatives to thrive and contribute to local economic growth.Our mission encompasses facilitating cooperative registration, ensuring compliance with regulatory requirements, providing continuous training and development opportunities, and fostering an environment where cooperatives can effectively serve their members and the broader community.</p>
+                
+                </div>
+                <div class="col-md-12">
+                    <h3 class="mission-vision-title vision-title mb-3">VISION</h3>
+                    <p class="mission-vision-text vision-text" id="about-vision">We envision a vibrant cooperative sector in San Francisco, Quezon, where well-managed, financially stable cooperatives serve as catalysts for inclusive economic development and poverty reduction. Our vision is to create a community where cooperatives are recognized as key partners in local governance and sustainable development.Through innovative programs and collaborative partnerships, we aim to establish San Francisco as a model municipality for cooperative development, demonstrating how cooperative enterprises can transform communities and improve the quality of life for all residents.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Organization Structure Section -->
+        <section class="about-section">
+            <div class="container">
+                <div class="section-card">
+                    <h2 class="section-title">Organization Structure</h2>
+                    <div class="org-chart">
+                        <!-- Municipal Leadership -->
+                        <div class="org-level">
+                            <div class="org-title">Municipal Mayor</div>
+                            <div class="org-positions">
+                                <div class="org-position">
+                                    <img src="mayor.jpg" alt="Mayor Joselito R. Alega">
+                                    <span>Hon. Joselito R. Alega</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MCDO Office -->
+                        <div class="org-level">
+                            <div class="org-title">MCDO Head</div>
+                            <div class="org-positions">
+                                <div class="org-position">
+                                    <img src="head.jpg" alt="MCDO Head Marian A. De Belen">
+                                    <span>Marian A. De Belen</span>
+                                </div>
+                            </div>
+                        </div>
+
+    
+                    </div>
+                </div>
+            </div>
+        </section>
+
+      
+        <!-- Barangays Section -->
+        <section class="about-section">
+            <div class="container">
+                <div class="section-card">
+                    <div class="icon-box">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h2 class="section-title">Barangays</h2>
+                    <p class="text-center mb-4" style="color: #666; font-size: 1.1rem;">San Francisco, Quezon consists of 16 barangays</p>
+                    <div class="row g-3">
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Butanguiad
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Casay
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Cawayan I
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Cawayan II
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Don Juan Vercelos (Utod)
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Huyon-Uyon
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Ibabang Tayuman (Busdak)
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Ilayang Tayuman
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Inabuan
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Mabunga
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Nasalaan
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Pagsangahan
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Poblacion
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Pugon
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Santo Niño
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="barangay-item">
+                                <i class="fas fa-home me-2"></i>Silongin
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        window.onload = function() {
+            loadAboutContent();
+        };
+
+        async function loadAboutContent() {
+            const API_URL = '/api';
+            const res = await fetch(`${API_URL}/about`);
+            const aboutData = await res.json();
+            
+            if (!aboutData.description) return;
+
+            // Update Description
+            const descElement = document.getElementById('about-description');
+            if (descElement && aboutData.description) {
+                descElement.textContent = aboutData.description;
+            }
+
+            // Update Vision
+            const visionElement = document.getElementById('about-vision');
+            if (visionElement && aboutData.vision) {
+                visionElement.textContent = aboutData.vision;
+            }
+
+            // Update Mission - formats as a list if newlines are present
+            const missionElement = document.getElementById('about-mission');
+            if (missionElement && aboutData.mission) {
+                if (aboutData.mission.includes('\n')) {
+                    const points = aboutData.mission.split('\n').filter(p => p.trim());
+                    missionElement.innerHTML = `
+                        <ul class="list-unstyled">
+                            ${points.map(p => `<li class="mb-2"><i class="fas fa-check-circle me-3" style="color: #003366;"></i>${p.trim()}</li>`).join('')}
+                        </ul>`;
+                } else {
+                    missionElement.innerHTML = aboutData.mission.replace(/\n/g, '<br>');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
