@@ -282,8 +282,10 @@ function verifySecurity(event) {
     securityAlert.innerHTML = '';
     
     if (accessPassword === correctPassword) {
-        // Correct password - set flag and redirect to admin dashboard
+        // Correct password - set flags and redirect to admin dashboard
         localStorage.setItem('accessVerified', 'true');
+        localStorage.setItem('adminLoggedIn', 'true');
+        localStorage.setItem('adminUsername', 'Admin');
         securityAlert.innerHTML = `
             <div class="alert alert-success">
                 <i class="fas fa-check-circle me-2"></i>Access verified! Redirecting to admin dashboard...
@@ -309,10 +311,11 @@ function verifySecurity(event) {
 // Check if already verified
 window.onload = function() {
     console.log('Checking access verification...');
+    const isLoggedIn = localStorage.getItem('adminLoggedIn');
     const isVerified = localStorage.getItem('accessVerified');
     
-    if (isVerified === 'true') {
-        console.log('User already verified, redirecting to admin.html');
+    if (isLoggedIn === 'true' && isVerified === 'true') {
+        console.log('User already verified and logged in, redirecting to admin.html');
         window.location.href = 'admin.html';
     }
 };
