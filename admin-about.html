@@ -353,17 +353,20 @@ async function saveAbout() {
 }
 
 function updatePreview(aboutData) {
-    document.getElementById('preview-description').textContent = aboutData.description;
-    document.getElementById('preview-vision').textContent = aboutData.vision;
+    document.getElementById('preview-description').textContent = aboutData.description || '';
+    document.getElementById('preview-vision').textContent = aboutData.vision || '';
     
     const missionList = document.getElementById('preview-mission');
     missionList.innerHTML = '';
-    const missionPoints = aboutData.mission.split('\n').filter(point => point.trim());
-    missionPoints.forEach(point => {
-        const li = document.createElement('li');
-        li.textContent = point;
-        missionList.appendChild(li);
-    });
+    
+    if (aboutData.mission) {
+        const missionPoints = aboutData.mission.split('\n').filter(point => point.trim());
+        missionPoints.forEach(point => {
+            const li = document.createElement('li');
+            li.textContent = point;
+            missionList.appendChild(li);
+        });
+    }
 }
 </script>
 
