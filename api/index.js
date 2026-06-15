@@ -39,4 +39,5 @@ app.post('/api/auth', (req, res) => {
     res.json({ success: true, message: 'Security verification already handled on frontend' });
 });
 
+// Vercel serverless function export
 module.exports = app;
