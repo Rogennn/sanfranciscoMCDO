@@ -15,3 +15,4 @@ services:
       name: data
       mountPath: /opt/render/project
       sizeGB: 1
+    runtime: node-js-18
