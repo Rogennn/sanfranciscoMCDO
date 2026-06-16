@@ -227,6 +227,7 @@ body { font-family: 'Source Sans 3', sans-serif; margin: 0; background: #f2f2f2;
 .row-animate { animation: fadeSlideIn .2s ease; }
 .section-divider { border: none; border-top: 1.5px solid #f0e8e8; margin: 20px 0; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -775,16 +776,57 @@ async function deleteCooperative(id) {
 }
 
 // ---- EXPORT ----
-function exportCooperatives() {
+async function exportCooperatives() {
   if (!cooperatives.length) { alert('No cooperatives to export'); return; }
-  let csv = 'Name,Type,Members,Status,Business Activity,Products\n';
-  cooperatives.forEach(c => {
-    csv += `"${c.name}","${c.type}","${c.members}","${c.status}","${c.businessActivity||''}","${c.products||''}"\n`;
-  });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = 'cooperatives_export.csv';
-  a.click();
+
+  // Create PDF wrapper with admin view design
+  const pdfWrapper = document.createElement('div');
+  pdfWrapper.style.padding = '40px';
+  pdfWrapper.style.background = 'white';
+  pdfWrapper.innerHTML = `
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #6b0000; padding-bottom: 20px;">
+      <h1 style="color: #6b0000; font-family: 'Playfair Display', serif; font-weight: 700; margin: 0;">Cooperatives List</h1>
+      <p style="color: #666; margin: 10px 0 0 0;">Municipal Cooperatives Development Office<br>San Francisco, Quezon</p>
+      <p style="color: #888; margin: 5px 0 0 0; font-size: 0.9rem;">Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+      ${cooperatives.map(coop => `
+        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="width: 100%; height: 120px; background: linear-gradient(135deg, #6b0000 0%, #4a0000 100%); display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-users" style="color: white; font-size: 2.5rem; opacity: 0.3;"></i>
+          </div>
+          <div style="padding: 18px 20px;">
+            <div style="font-size: 0.75rem; color: #888; margin-bottom: 6px; font-weight: 500;">Cooperative</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: #6b0000; margin: 0 0 8px; font-family: 'Playfair Display', serif;">${escHtml(coop.name)}</div>
+            <div style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 12px;">${escHtml(coop.businessActivity || 'Community development through cooperative efforts.')}</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+              <span style="font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; font-weight: 600; background: #d4edda; color: #155724;">${coop.status || 'Active'}</span>
+              <span style="font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; font-weight: 600; background: #f0f0f0; color: #555;">${escHtml(coop.type || '—')}</span>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0; font-size: 0.85rem; color: #666;">
+              <strong>Members:</strong> ${escHtml(String(coop.members || '—'))}
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // PDF configuration
+  const opt = {
+    margin:       10,
+    filename:     'cooperatives-list.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  try {
+    await html2pdf().set(opt).from(pdfWrapper).save();
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+    alert('Failed to generate PDF. Please try again.');
+  }
 }
 
 </script>
