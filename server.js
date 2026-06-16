@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const path = require('path');
@@ -29,110 +29,93 @@ app.use((req, res, next) => {
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 // SQLite Database Connection
-const db = new sqlite3.Database('./mcdo_db.sqlite', (err) => {
-    if (err) {
-        console.error('❌ SQLite Database connection error:', err);
-    } else {
-        console.log('✅ SQLite Database connected successfully.');
-        initializeDatabase();
-    }
-});
+const db = new Database('./mcdo_db.sqlite');
+console.log('✅ SQLite Database connected successfully.');
+initializeDatabase();
 
 // Initialize database tables
 function initializeDatabase() {
-    db.serialize(() => {
-        db.run(`
-            CREATE TABLE IF NOT EXISTS calendar_notes (
-                note_date TEXT PRIMARY KEY,
-                note_text TEXT NOT NULL,
-                note_type TEXT DEFAULT 'general',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS calendar_notes (
+            note_date TEXT PRIMARY KEY,
+            note_text TEXT NOT NULL,
+            note_type TEXT DEFAULT 'general',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 
-        db.run(`
-            CREATE TABLE IF NOT EXISTS cooperatives (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                type TEXT,
-                status TEXT,
-                members TEXT,
-                businessActivity TEXT,
-                products TEXT,
-                numberMembers TEXT,
-                dateEstablished DATE,
-                businessAddress TEXT,
-                contactNumber TEXT,
-                email TEXT,
-                trainingGeneral TEXT,
-                boardRows TEXT,
-                staffRows TEXT,
-                committeeRows TEXT,
-                createdBy TEXT
-            )
-        `);
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS cooperatives (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            type TEXT,
+            status TEXT,
+            members TEXT,
+            businessActivity TEXT,
+            products TEXT,
+            numberMembers TEXT,
+            dateEstablished DATE,
+            businessAddress TEXT,
+            contactNumber TEXT,
+            email TEXT,
+            trainingGeneral TEXT,
+            boardRows TEXT,
+            staffRows TEXT,
+            committeeRows TEXT,
+            createdBy TEXT
+        )
+    `);
 
-        db.run(`
-            CREATE TABLE IF NOT EXISTS announcements (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                date DATE,
-                content TEXT,
-                image TEXT,
-                status TEXT DEFAULT 'Active',
-                createdBy TEXT
-            )
-        `);
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS announcements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            date DATE,
+            content TEXT,
+            image TEXT,
+            status TEXT DEFAULT 'Active',
+            createdBy TEXT
+        )
+    `);
 
-        db.run(`
-            CREATE TABLE IF NOT EXISTS about_content (
-                id INTEGER PRIMARY KEY,
-                description TEXT,
-                vision TEXT,
-                mission TEXT
-            )
-        `, () => {
-            // Ensure at least one row exists
-            db.get('SELECT id FROM about_content WHERE id = 1', (err, row) => {
-                if (!row) {
-                    db.run(
-                        'INSERT INTO about_content (id, description, vision, mission) VALUES (1, "", "", "")'
-                    );
-                }
-            });
-        });
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS about_content (
+            id INTEGER PRIMARY KEY,
+            description TEXT,
+            vision TEXT,
+            mission TEXT
+        )
+    `);
 
-        console.log('📋 Database tables initialized.');
-    });
+    // Ensure at least one row exists
+    const stmt = db.prepare('SELECT id FROM about_content WHERE id = 1');
+    const row = stmt.get();
+    if (!row) {
+        const insertStmt = db.prepare('INSERT INTO about_content (id, description, vision, mission) VALUES (1, "", "", "")');
+        insertStmt.run();
+    }
+
+    console.log('📋 Database tables initialized.');
 }
 
-// Helper functions for database queries (using promises)
+// Helper functions for database queries
 function runAsync(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function(err) {
-            if (err) reject(err);
-            else resolve(this);
-        });
-    });
+    const stmt = db.prepare(sql);
+    const result = stmt.run(params);
+    return result;
 }
 
 function allAsync(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+    const stmt = db.prepare(sql);
+    const rows = stmt.all(params);
+    return rows;
 }
 
 function getAsync(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
+    const stmt = db.prepare(sql);
+    const row = stmt.get(params);
+    return row;
 }
 
 // GET all notes
