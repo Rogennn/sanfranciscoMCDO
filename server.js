@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const Database = require('better-sqlite3');
+const initSqlJs = require('sql.js');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const path = require('path');
@@ -29,13 +29,33 @@ app.use((req, res, next) => {
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 // SQLite Database Connection
-const db = new Database('./mcdo_db.sqlite');
-console.log('✅ SQLite Database connected successfully.');
-initializeDatabase();
+let db;
+let SQL;
+
+async function initDatabase() {
+    SQL = await initSqlJs();
+    
+    // Load existing database or create new one
+    const fs = require('fs');
+    let dbBuffer;
+    try {
+        if (fs.existsSync('./mcdo_db.sqlite')) {
+            dbBuffer = fs.readFileSync('./mcdo_db.sqlite');
+        }
+    } catch (err) {
+        console.log('No existing database found, creating new one');
+    }
+    
+    db = new SQL.Database(dbBuffer || null);
+    console.log('✅ SQLite Database connected successfully.');
+    initializeDatabase();
+}
+
+initDatabase();
 
 // Initialize database tables
 function initializeDatabase() {
-    db.exec(`
+    db.run(`
         CREATE TABLE IF NOT EXISTS calendar_notes (
             note_date TEXT PRIMARY KEY,
             note_text TEXT NOT NULL,
@@ -45,7 +65,7 @@ function initializeDatabase() {
         )
     `);
 
-    db.exec(`
+    db.run(`
         CREATE TABLE IF NOT EXISTS cooperatives (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -67,7 +87,7 @@ function initializeDatabase() {
         )
     `);
 
-    db.exec(`
+    db.run(`
         CREATE TABLE IF NOT EXISTS announcements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
@@ -79,7 +99,7 @@ function initializeDatabase() {
         )
     `);
 
-    db.exec(`
+    db.run(`
         CREATE TABLE IF NOT EXISTS about_content (
             id INTEGER PRIMARY KEY,
             description TEXT,
@@ -90,10 +110,9 @@ function initializeDatabase() {
 
     // Ensure at least one row exists
     const stmt = db.prepare('SELECT id FROM about_content WHERE id = 1');
-    const row = stmt.get();
-    if (!row) {
-        const insertStmt = db.prepare('INSERT INTO about_content (id, description, vision, mission) VALUES (1, "", "", "")');
-        insertStmt.run();
+    const result = stmt.getAsObject();
+    if (!result || result.length === 0) {
+        db.run('INSERT INTO about_content (id, description, vision, mission) VALUES (1, "", "", "")');
     }
 
     console.log('📋 Database tables initialized.');
@@ -102,19 +121,31 @@ function initializeDatabase() {
 // Helper functions for database queries
 function runAsync(sql, params = []) {
     const stmt = db.prepare(sql);
-    const result = stmt.run(params);
+    stmt.bind(params);
+    const result = stmt.run();
+    stmt.free();
     return result;
 }
 
 function allAsync(sql, params = []) {
     const stmt = db.prepare(sql);
-    const rows = stmt.all(params);
+    stmt.bind(params);
+    const rows = [];
+    while (stmt.step()) {
+        rows.push(stmt.getAsObject());
+    }
+    stmt.free();
     return rows;
 }
 
 function getAsync(sql, params = []) {
     const stmt = db.prepare(sql);
-    const row = stmt.get(params);
+    stmt.bind(params);
+    let row = null;
+    if (stmt.step()) {
+        row = stmt.getAsObject();
+    }
+    stmt.free();
     return row;
 }
 
@@ -307,10 +338,32 @@ app.post('/api/auth', (req, res) => {
 // Serve Static Files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
 
+// Save database to file on shutdown
+function saveDatabase() {
+    const fs = require('fs');
+    const data = db.export();
+    const buffer = Buffer.from(data);
+    fs.writeFileSync('./mcdo_db.sqlite', buffer);
+}
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📦 SQLite Database: mcdo_db.sqlite`);
+});
+
+// Save database periodically (every 30 seconds)
+setInterval(saveDatabase, 30000);
+
+// Save database on process exit
+process.on('SIGINT', () => {
+    saveDatabase();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    saveDatabase();
+    process.exit(0);
 });
 
 /**
