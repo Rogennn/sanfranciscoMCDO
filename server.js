@@ -338,6 +338,23 @@ app.post('/api/auth', (req, res) => {
 // Serve Static Files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
 
+// Catch-all route for SPA-like behavior - serve index.html for non-API routes
+app.get('*', (req, res) => {
+    // If it's an API route, let it 404
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    // For HTML files, try to serve them directly
+    const fs = require('fs');
+    const filePath = path.join(__dirname, req.path);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        res.sendFile(filePath);
+    } else {
+        // Default to index.html for unknown routes
+        res.sendFile(path.join(__dirname, 'index.html'));
+    }
+});
+
 // Save database to file on shutdown
 function saveDatabase() {
     const fs = require('fs');
