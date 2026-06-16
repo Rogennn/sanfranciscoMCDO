@@ -335,6 +335,37 @@ app.post('/api/auth', (req, res) => {
     res.json({ success: true, message: 'Security verification already handled on frontend' });
 });
 
+// Image upload endpoint
+app.post('/api/upload-image', (req, res) => {
+    try {
+        const { image, filename } = req.body;
+        if (!image || !filename) {
+            return res.status(400).json({ error: 'Image data and filename required' });
+        }
+
+        // Remove data URL prefix if present
+        const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        // Create uploads directory if it doesn't exist
+        const fs = require('fs');
+        const path = require('path');
+        const uploadsDir = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir);
+        }
+
+        // Save image file
+        const filepath = path.join(uploadsDir, filename);
+        fs.writeFileSync(filepath, buffer);
+
+        res.json({ imageUrl: `/uploads/${filename}` });
+    } catch (err) {
+        console.error('Error uploading image:', err);
+        res.status(500).json({ error: 'Image upload failed' });
+    }
+});
+
 // Serve Static Files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
 
