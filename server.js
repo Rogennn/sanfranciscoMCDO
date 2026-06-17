@@ -32,15 +32,25 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 let db;
 let SQL;
 
+// Use Render disk mount path for persistence
+const DATA_DIR = process.env.RENDER ? '/opt/render/project/data' : __dirname;
+const DB_PATH = path.join(DATA_DIR, 'mcdo_db.sqlite');
+const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
+
 async function initDatabase() {
     SQL = await initSqlJs();
     
-    // Load existing database or create new one
+    // Create data directory if it doesn't exist
     const fs = require('fs');
+    if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    
+    // Load existing database or create new one
     let dbBuffer;
     try {
-        if (fs.existsSync('./mcdo_db.sqlite')) {
-            dbBuffer = fs.readFileSync('./mcdo_db.sqlite');
+        if (fs.existsSync(DB_PATH)) {
+            dbBuffer = fs.readFileSync(DB_PATH);
         }
     } catch (err) {
         console.log('No existing database found, creating new one');
@@ -48,6 +58,7 @@ async function initDatabase() {
     
     db = new SQL.Database(dbBuffer || null);
     console.log('✅ SQLite Database connected successfully.');
+    console.log(`📦 Database path: ${DB_PATH}`);
     initializeDatabase();
 }
 
@@ -349,14 +360,12 @@ app.post('/api/upload-image', (req, res) => {
 
         // Create uploads directory if it doesn't exist
         const fs = require('fs');
-        const path = require('path');
-        const uploadsDir = path.join(__dirname, 'uploads');
-        if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir);
+        if (!fs.existsSync(UPLOADS_DIR)) {
+            fs.mkdirSync(UPLOADS_DIR, { recursive: true });
         }
 
         // Save image file
-        const filepath = path.join(uploadsDir, filename);
+        const filepath = path.join(UPLOADS_DIR, filename);
         fs.writeFileSync(filepath, buffer);
 
         res.json({ imageUrl: `/uploads/${filename}` });
@@ -368,6 +377,9 @@ app.post('/api/upload-image', (req, res) => {
 
 // Serve Static Files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
+
+// Serve uploaded files from the data directory
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 // Catch-all route for SPA-like behavior - serve index.html for non-API routes
 app.get('*', (req, res) => {
@@ -391,7 +403,8 @@ function saveDatabase() {
     const fs = require('fs');
     const data = db.export();
     const buffer = Buffer.from(data);
-    fs.writeFileSync('./mcdo_db.sqlite', buffer);
+    fs.writeFileSync(DB_PATH, buffer);
+    console.log('💾 Database saved to:', DB_PATH);
 }
 
 const PORT = process.env.PORT || 3000;

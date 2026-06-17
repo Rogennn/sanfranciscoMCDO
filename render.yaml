@@ -11,7 +11,9 @@ services:
         value: production
       - key: JWT_SECRET
         generateValue: true
+      - key: RENDER
+        value: "true"
     disk:
       name: data
-      mountPath: /opt/render/project
+      mountPath: /opt/render/project/data
       sizeGB: 1
