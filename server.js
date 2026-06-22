@@ -124,6 +124,7 @@ function initializeDatabase() {
     const result = stmt.getAsObject();
     if (!result || result.length === 0) {
         db.run('INSERT INTO about_content (id, description, vision, mission) VALUES (1, "", "", "")');
+        saveDatabase();
     }
 
     console.log('📋 Database tables initialized.');
@@ -135,6 +136,7 @@ function runAsync(sql, params = []) {
     stmt.bind(params);
     const result = stmt.run();
     stmt.free();
+    saveDatabase(); // Save immediately after write operation
     return result;
 }
 
@@ -398,7 +400,7 @@ app.get('*', (req, res) => {
     }
 });
 
-// Save database to file on shutdown
+// Save database to file immediately
 function saveDatabase() {
     const fs = require('fs');
     const data = db.export();
@@ -413,7 +415,7 @@ app.listen(PORT, () => {
     console.log(`📦 SQLite Database: mcdo_db.sqlite`);
 });
 
-// Save database periodically (every 30 seconds)
+// Save database periodically (every 30 seconds) as backup
 setInterval(saveDatabase, 30000);
 
 // Save database on process exit
@@ -434,5 +436,7 @@ process.on('SIGTERM', () => {
  * 
  * Data Persistence:
  * - All data is stored in SQLite database (mcdo_db.sqlite)
- * - Data persists across server restarts
+ * - Database saves immediately after every write operation
+ * - Database also saves every 30 seconds as backup
+ * - Data persists across server restarts and deployments
  */
