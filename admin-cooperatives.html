@@ -779,6 +779,16 @@ async function deleteCooperative(id) {
 async function exportCooperatives() {
   if (!cooperatives.length) { alert('No cooperatives to export'); return; }
 
+  // Check if html2pdf is loaded
+  if (typeof html2pdf === 'undefined') {
+    alert('PDF library not loaded. Please refresh the page and try again.');
+    console.error('html2pdf library not loaded');
+    return;
+  }
+
+  console.log('Starting PDF export...');
+  console.log('Number of cooperatives:', cooperatives.length);
+
   // Create PDF wrapper with full cooperative details
   const pdfWrapper = document.createElement('div');
   pdfWrapper.style.padding = '40px';
@@ -864,16 +874,35 @@ async function exportCooperatives() {
     margin:       10,
     filename:     'cooperatives-list.pdf',
     image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
+    html2canvas:  { scale: 2, useCORS: true, logging: true },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
   try {
+    console.log('Generating PDF...');
     await html2pdf().set(opt).from(pdfWrapper).save();
+    console.log('PDF generated successfully');
   } catch (error) {
     console.error('PDF generation failed:', error);
-    alert('Failed to generate PDF. Please try again.');
+    
+    // Fallback to CSV export if PDF fails
+    if (confirm('PDF generation failed: ' + error.message + '\n\nWould you like to download as CSV instead?')) {
+      exportToCSV();
+    }
   }
+}
+
+// CSV export as fallback
+function exportToCSV() {
+  let csv = 'Name,Type,Status,Members,Business Activity,Products,Business Address,Contact Number,Email,Date Established\n';
+  cooperatives.forEach(c => {
+    csv += `"${c.name}","${c.type}","${c.status}","${c.members}","${c.businessActivity||''}","${c.products||''}","${c.businessAddress||''}","${c.contactNumber||''}","${c.email||''}","${c.dateEstablished||''}"\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'cooperatives_export.csv';
+  a.click();
+  console.log('CSV export completed');
 }
 
 </script>
