@@ -46,6 +46,12 @@ async function initDatabase() {
         fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     
+    // Create uploads directory if it doesn't exist
+    if (!fs.existsSync(UPLOADS_DIR)) {
+        fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+        console.log('📁 Uploads directory created:', UPLOADS_DIR);
+    }
+    
     // Load existing database or create new one
     let dbBuffer;
     try {
@@ -64,6 +70,7 @@ async function initDatabase() {
     db = new SQL.Database(dbBuffer || null);
     console.log('✅ SQLite Database connected successfully.');
     console.log(`📦 Database path: ${DB_PATH}`);
+    console.log(`📁 Uploads directory: ${UPLOADS_DIR}`);
     initializeDatabase();
     
     // Save immediately after initialization to ensure file exists
