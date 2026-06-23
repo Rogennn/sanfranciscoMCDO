@@ -50,16 +50,24 @@ async function initDatabase() {
     let dbBuffer;
     try {
         if (fs.existsSync(DB_PATH)) {
+            const stats = fs.statSync(DB_PATH);
+            console.log(`📦 Found existing database file (${stats.size} bytes)`);
             dbBuffer = fs.readFileSync(DB_PATH);
+            console.log('✅ Database loaded from file successfully');
+        } else {
+            console.log('⚠️ No existing database found, creating new one');
         }
     } catch (err) {
-        console.log('No existing database found, creating new one');
+        console.log('⚠️ Error loading database, creating new one:', err.message);
     }
     
     db = new SQL.Database(dbBuffer || null);
     console.log('✅ SQLite Database connected successfully.');
     console.log(`📦 Database path: ${DB_PATH}`);
     initializeDatabase();
+    
+    // Save immediately after initialization to ensure file exists
+    saveDatabase();
 }
 
 initDatabase();
@@ -125,9 +133,13 @@ function initializeDatabase() {
     if (!result || result.length === 0) {
         db.run('INSERT INTO about_content (id, description, vision, mission) VALUES (1, "", "", "")');
         saveDatabase();
+        console.log('✅ Default about_content row created');
     }
 
     console.log('📋 Database tables initialized.');
+    
+    // Force save after initialization to ensure file exists
+    saveDatabase();
 }
 
 // Helper functions for database queries
@@ -137,6 +149,7 @@ function runAsync(sql, params = []) {
     const result = stmt.run();
     stmt.free();
     saveDatabase(); // Save immediately after write operation
+    console.log(`📝 Executed write operation: ${sql.substring(0, 50)}...`);
     return result;
 }
 
@@ -254,10 +267,10 @@ app.get('/api/cooperatives', async (req, res) => {
 app.post('/api/cooperatives', async (req, res) => {
     const c = req.body;
     const data = [
-        c.name, c.type, c.status, c.members, c.businessActivity, c.products,
-        c.numberMembers, c.dateEstablished || null, c.businessAddress, c.contactNumber,
-        c.email, c.trainingGeneral, JSON.stringify(c.boardRows || []),
-        JSON.stringify(c.staffRows || []), JSON.stringify(c.committeeRows || []), c.createdBy
+        c.name || null, c.type || null, c.status || null, c.members || null, c.businessActivity || null, c.products || null,
+        c.numberMembers || null, c.dateEstablished || null, c.businessAddress || null, c.contactNumber || null,
+        c.email || null, c.trainingGeneral || null, JSON.stringify(c.boardRows || []),
+        JSON.stringify(c.staffRows || []), JSON.stringify(c.committeeRows || []), c.createdBy || null
     ];
 
     try {
@@ -301,7 +314,7 @@ app.get('/api/announcements', async (req, res) => {
 
 app.post('/api/announcements', async (req, res) => {
     const a = req.body;
-    const data = [a.title, a.date || null, a.content, a.image, a.status, a.createdBy];
+    const data = [a.title, a.date || null, a.content || null, a.image || null, a.status || 'Active', a.createdBy || null];
     
     try {
         if (a.id) {
@@ -402,11 +415,19 @@ app.get('*', (req, res) => {
 
 // Save database to file immediately
 function saveDatabase() {
-    const fs = require('fs');
-    const data = db.export();
-    const buffer = Buffer.from(data);
-    fs.writeFileSync(DB_PATH, buffer);
-    console.log('💾 Database saved to:', DB_PATH);
+    try {
+        const fs = require('fs');
+        const data = db.export();
+        const buffer = Buffer.from(data);
+        fs.writeFileSync(DB_PATH, buffer);
+        
+        // Verify the file was written correctly
+        const stats = fs.statSync(DB_PATH);
+        console.log(`💾 Database saved successfully to: ${DB_PATH} (${stats.size} bytes)`);
+    } catch (err) {
+        console.error('❌ ERROR saving database:', err.message);
+        console.error('Stack trace:', err.stack);
+    }
 }
 
 const PORT = process.env.PORT || 3000;
