@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const initSqlJs = require('sql.js');
+const Database = require('better-sqlite3');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const path = require('path');
@@ -30,16 +30,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 // SQLite Database Connection
 let db;
-let SQL;
 
 // Use Render disk mount path for persistence
 const DATA_DIR = process.env.RENDER ? '/opt/render/project/data' : __dirname;
 const DB_PATH = path.join(DATA_DIR, 'mcdo_db.sqlite');
 const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
 
-async function initDatabase() {
-    SQL = await initSqlJs();
-    
+function initDatabase() {
     // Create data directory if it doesn't exist
     const fs = require('fs');
     if (!fs.existsSync(DATA_DIR)) {
@@ -52,29 +49,14 @@ async function initDatabase() {
         console.log('📁 Uploads directory created:', UPLOADS_DIR);
     }
     
-    // Load existing database or create new one
-    let dbBuffer;
-    try {
-        if (fs.existsSync(DB_PATH)) {
-            const stats = fs.statSync(DB_PATH);
-            console.log(`📦 Found existing database file (${stats.size} bytes)`);
-            dbBuffer = fs.readFileSync(DB_PATH);
-            console.log('✅ Database loaded from file successfully');
-        } else {
-            console.log('⚠️ No existing database found, creating new one');
-        }
-    } catch (err) {
-        console.log('⚠️ Error loading database, creating new one:', err.message);
-    }
+    // Connect to database (better-sqlite3 handles persistence automatically)
+    db = new Database(DB_PATH);
+    db.pragma('journal_mode = WAL'); // Enable Write-Ahead Logging for better performance
     
-    db = new SQL.Database(dbBuffer || null);
     console.log('✅ SQLite Database connected successfully.');
     console.log(`📦 Database path: ${DB_PATH}`);
     console.log(`📁 Uploads directory: ${UPLOADS_DIR}`);
     initializeDatabase();
-    
-    // Save immediately after initialization to ensure file exists
-    saveDatabase();
 }
 
 initDatabase();
@@ -136,49 +118,32 @@ function initializeDatabase() {
 
     // Ensure at least one row exists
     const stmt = db.prepare('SELECT id FROM about_content WHERE id = 1');
-    const result = stmt.getAsObject();
-    if (!result || result.length === 0) {
+    const result = stmt.get();
+    if (!result) {
         db.run('INSERT INTO about_content (id, description, vision, mission) VALUES (1, "", "", "")');
-        saveDatabase();
         console.log('✅ Default about_content row created');
     }
 
     console.log('📋 Database tables initialized.');
-    
-    // Force save after initialization to ensure file exists
-    saveDatabase();
 }
 
 // Helper functions for database queries
 function runAsync(sql, params = []) {
     const stmt = db.prepare(sql);
-    stmt.bind(params);
-    const result = stmt.run();
-    stmt.free();
-    saveDatabase(); // Save immediately after write operation
+    const result = stmt.run(...params);
     console.log(`📝 Executed write operation: ${sql.substring(0, 50)}...`);
     return result;
 }
 
 function allAsync(sql, params = []) {
     const stmt = db.prepare(sql);
-    stmt.bind(params);
-    const rows = [];
-    while (stmt.step()) {
-        rows.push(stmt.getAsObject());
-    }
-    stmt.free();
+    const rows = stmt.all(...params);
     return rows;
 }
 
 function getAsync(sql, params = []) {
     const stmt = db.prepare(sql);
-    stmt.bind(params);
-    let row = null;
-    if (stmt.step()) {
-        row = stmt.getAsObject();
-    }
-    stmt.free();
+    const row = stmt.get(...params);
     return row;
 }
 
@@ -420,41 +385,10 @@ app.get('*', (req, res) => {
     }
 });
 
-// Save database to file immediately
-function saveDatabase() {
-    try {
-        const fs = require('fs');
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        fs.writeFileSync(DB_PATH, buffer);
-        
-        // Verify the file was written correctly
-        const stats = fs.statSync(DB_PATH);
-        console.log(`💾 Database saved successfully to: ${DB_PATH} (${stats.size} bytes)`);
-    } catch (err) {
-        console.error('❌ ERROR saving database:', err.message);
-        console.error('Stack trace:', err.stack);
-    }
-}
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📦 SQLite Database: mcdo_db.sqlite`);
-});
-
-// Save database periodically (every 30 seconds) as backup
-setInterval(saveDatabase, 30000);
-
-// Save database on process exit
-process.on('SIGINT', () => {
-    saveDatabase();
-    process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-    saveDatabase();
-    process.exit(0);
 });
 
 /**
@@ -464,7 +398,7 @@ process.on('SIGTERM', () => {
  * 
  * Data Persistence:
  * - All data is stored in SQLite database (mcdo_db.sqlite)
- * - Database saves immediately after every write operation
- * - Database also saves every 30 seconds as backup
+ * - Using better-sqlite3 for automatic disk persistence
  * - Data persists across server restarts and deployments
+ * - No manual save needed - writes are immediately persisted
  */
